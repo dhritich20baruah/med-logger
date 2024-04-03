@@ -4,12 +4,16 @@
   "description": "backend for react native app",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js"
   },
   "author": "Dhriti",
   "license": "ISC",
   "dependencies": {
     "express": "^4.19.2",
     "pg": "^8.11.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
   }
 }

@@ -5,6 +5,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NativeWindStyleSheet } from "nativewind";
 import { handleSubmit } from "./storage";
+import Storage from "./storage";
 
 NativeWindStyleSheet.setOutput({
   default: "native",
@@ -54,6 +55,9 @@ function HomeScreen({ navigation, route }) {
         keyboardType="numeric"
       />
       <Button title="Submit" onPress={handleFormSubmit} style={{backgroundColor: 'red'}}/>
+      <View className="h-[25%] flex-1 items-center justify-center">
+        <Storage/>
+      </View>
     </View>
   );
 }
