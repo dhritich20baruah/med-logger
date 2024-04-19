@@ -1,6 +1,14 @@
 import * as React from "react";
 import { useState } from "react";
-import { StyleSheet, Text, View, Button, TextInput, Image, ImageBackground } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Button,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NativeWindStyleSheet } from "nativewind";
@@ -12,52 +20,208 @@ NativeWindStyleSheet.setOutput({
 });
 
 function HomeScreen({ navigation, route }) {
-  const [name, setName] = useState('');
-  const [age, setAge] = useState('');
-  const [height, setHeight] = useState('');
-  const [weight, setWeight] = useState('');
+  const [name, setName] = useState("");
+  const [age, setAge] = useState("");
+  const [height, setHeight] = useState("");
+  const [weight, setWeight] = useState("");
+  const [heightUnit, setHeightUnit] = useState(false);
+  const [weightUnit, setWeightUnit] = useState(false);
+  const [feet, setFeet] = useState("");
+  const [inch, setInch] = useState("");
 
-  const handleFormSubmit = () => {
-    handleSubmit(name, age, height, weight)
-  }
+  const toggleWeightUnit = () => {
+    setWeightUnit((prevState) => !prevState);
+  };
 
-  return (  
-    <View className="flex-1 p-5 space-y-2">
-      <Text className="text-lg">Name</Text>
+  const toggleHeightUnit = () => {
+    setHeightUnit((prevState) => !prevState);
+  };
+
+  const handleSubmit = () => {
+    if (!name.trim()) {
+      Alert.alert("Name is required");
+      return;
+    }
+    if (isNaN(parseInt(age)) || parseInt(age) <= 0) {
+      Alert.alert("Age must be a positive number");
+      return;
+    }
+    if (isNaN(parseFloat(weight)) || parseFloat(weight) <= 0) {
+      Alert.alert("Weight must be a positive number");
+      return;
+    }
+    if (heightUnit) {
+      if (isNaN(parseInt(feet)) || parseInt(feet) <= 0) {
+        Alert.alert("Feet must be a positive number");
+        return;
+      }
+      if (isNaN(parseInt(inch)) || parseInt(inch) < 0 || parseInt(inch) >= 12) {
+        Alert.alert("Inches must be a number between 0 and 11");
+        return;
+      }
+    } else {
+      if (isNaN(parseFloat(height)) || parseFloat(height) <= 0) {
+        Alert.alert("Height must be a positive number");
+        return;
+      }
+    }
+
+     // Convert units if necessary
+     let heightResult = height;
+     let weightResult = weight;
+     if (heightUnit) {
+       const totalInches = parseInt(feet) * 12 + parseInt(inch);
+       const centimeters = totalInches * 2.54;
+       heightResult = centimeters.toString();
+     }
+     if (weightUnit) {
+       const weightInKg = parseInt(weight) * 0.45;
+       weightResult = weightInKg.toString();
+     }
+     
+    // Handle form submission
+    console.log({
+      name,
+      age,
+      weight: weightResult + (weightUnit ? " lb." : " kg"),
+      height: heightResult + (heightUnit ? " cm" : " ft-in"),
+    });
+  };
+
+  return (
+    <View style={{ flex: 1, padding: 20 }}>
       <TextInput
-        className="h-14 border-2 border-indigo-600 rounded-md outline-none p-2"
+        placeholder="Name"
         value={name}
-        onChangeText={setName}
-        placeholder="Enter your name"
+        onChangeText={(text) => setName(text)}
+        style={{
+          marginBottom: 10,
+          padding: 10,
+          borderWidth: 1,
+          borderColor: "gray",
+        }}
       />
-      <Text className="text-lg">Age (year)</Text>
       <TextInput
-       className="h-14 border-2 border-indigo-600 rounded-md outline-none p-2"
+        placeholder="Age"
         value={age}
-        onChangeText={setAge}
-        placeholder="Enter your age"
+        onChangeText={(text) => setAge(text)}
         keyboardType="numeric"
+        style={{
+          marginBottom: 10,
+          padding: 10,
+          borderWidth: 1,
+          borderColor: "gray",
+        }}
       />
-      <Text className="text-lg">Height (cm)</Text>
+      <Text style={{ marginBottom: 5 }}>
+        Weight ({weightUnit ? "lb" : "kg"})
+      </Text>
       <TextInput
-        className="h-14 border-2 border-indigo-600 rounded-md outline-none p-2"
-        value={height}
-        onChangeText={setHeight}
-        placeholder="Enter your height"
-        keyboardType="numeric"
-      />
-      <Text className="text-lg">Weight (kg)</Text>
-      <TextInput
-        className="h-14 border-2 border-indigo-600 rounded-md outline-none p-2 mb-3"
+        placeholder={`Weight (${weightUnit ? "lb." : "kg."})`}
         value={weight}
-        onChangeText={setWeight}
-        placeholder="Enter your weight"
+        onChangeText={(text) => setWeight(text)}
         keyboardType="numeric"
+        style={{
+          marginBottom: 10,
+          padding: 10,
+          borderWidth: 1,
+          borderColor: "gray",
+        }}
       />
-      <Button title="Submit" onPress={handleFormSubmit} style={{backgroundColor: 'red'}}/>
-      <View className="h-[25%] flex-1 items-center justify-center">
-        <Storage/>
+      <View style={{ flexDirection: "row", marginBottom: 10 }}>
+        <TouchableOpacity
+          onPress={toggleWeightUnit}
+          style={{
+            marginRight: 10,
+            padding: 10,
+            backgroundColor: weightUnit ? "lightgray" : "blue",
+            borderRadius: 5,
+          }}
+        >
+          <Text style={{ color: weightUnit ? "black" : "white" }}>Kg</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={toggleWeightUnit}
+          style={{
+            padding: 10,
+            backgroundColor: weightUnit ? "blue" : "lightgray",
+            borderRadius: 5,
+          }}
+        >
+          <Text style={{ color: weightUnit ? "white" : "black" }}>lb.</Text>
+        </TouchableOpacity>
       </View>
+      <View style={{ marginBottom: 10 }}>
+        <Text style={{ marginBottom: 5 }}>
+          Height ({heightUnit ? "ft-in" : "cm"})
+        </Text>
+        {heightUnit ? (
+          <View style={{ flexDirection: "row" }}>
+            <TextInput
+              placeholder="Feet"
+              value={feet}
+              onChangeText={(text) => setFeet(text)}
+              keyboardType="numeric"
+              style={{
+                marginRight: 10,
+                flex: 1,
+                padding: 10,
+                borderWidth: 1,
+                borderColor: "gray",
+              }}
+            />
+            <TextInput
+              placeholder="Inches"
+              value={inch}
+              onChangeText={(text) => setInch(text)}
+              keyboardType="numeric"
+              style={{
+                flex: 1,
+                padding: 10,
+                borderWidth: 1,
+                borderColor: "gray",
+              }}
+            />
+          </View>
+        ) : (
+          <TextInput
+            placeholder="Height"
+            value={height}
+            onChangeText={(text) => setHeight(text)}
+            keyboardType="numeric"
+            style={{ padding: 10, borderWidth: 1, borderColor: "gray" }}
+          />
+        )}
+      </View>
+      <View style={{ flexDirection: "row", marginBottom: 10 }}>
+        <TouchableOpacity
+          onPress={toggleHeightUnit}
+          style={{
+            marginRight: 10,
+            padding: 10,
+            backgroundColor: heightUnit ? "lightgray" : "blue",
+            borderRadius: 5,
+          }}
+        >
+          <Text style={{ color: heightUnit ? "black" : "white" }}>cm</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={toggleHeightUnit}
+          style={{
+            padding: 10,
+            backgroundColor: heightUnit ? "blue" : "lightgray",
+            borderRadius: 5,
+          }}
+        >
+          <Text style={{ color: heightUnit ? "white" : "black" }}>ft-in</Text>
+        </TouchableOpacity>
+      </View>
+      <TouchableOpacity
+        onPress={handleSubmit}
+        style={{ backgroundColor: "blue", padding: 10, borderRadius: 5 }}
+      >
+        <Text style={{ color: "white", textAlign: "center" }}>Submit</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -90,12 +254,10 @@ export default function App() {
             headerTintColor: "#fff",
             headerTitleStyle: {
               fontWeight: "bold",
-            }
+            },
           })}
         />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
-
