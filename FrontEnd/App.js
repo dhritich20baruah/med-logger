@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -12,6 +12,7 @@ import {
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NativeWindStyleSheet } from "nativewind";
+import * as SQLite from 'expo-sqlite';
 import { handleSubmit } from "./storage";
 import Storage from "./storage";
 
@@ -36,6 +37,28 @@ function HomeScreen({ navigation, route }) {
   const toggleHeightUnit = () => {
     setHeightUnit((prevState) => !prevState);
   };
+
+  //DATABASE
+  const db = SQLite.openDatabase("med-logger.db")
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(()=>{
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS user_info (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, age INTEGER, weight REAL, height REAL)"
+      );
+    });
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM user_info", 
+        null,
+        (txObj, resultSet) => console.log(resultSet.rows._array),
+        (txObj, error) => console.log(error)
+      )
+    });
+    setIsLoading(false)
+  }, [])
 
   const handleSubmit = () => {
     if (!name.trim()) {
@@ -71,21 +94,25 @@ function HomeScreen({ navigation, route }) {
      let weightResult = weight;
      if (heightUnit) {
        const totalInches = parseInt(feet) * 12 + parseInt(inch);
-       const centimeters = totalInches * 2.54;
-       heightResult = centimeters.toString();
+       heightResult = totalInches * 2.54;
      }
      if (weightUnit) {
-       const weightInKg = parseInt(weight) * 0.45;
-       weightResult = weightInKg.toString();
+       weightResult = parseInt(weight) * 0.45;
      }
-     
+
     // Handle form submission
-    console.log({
-      name,
-      age,
-      weight: weightResult + (weightUnit ? " lb." : " kg"),
-      height: heightResult + (heightUnit ? " cm" : " ft-in"),
-    });
+      db.transaction((tx) => {
+      tx.executeSql(
+        "INSERT INTO user_info (name, age, weight, height) values (?, ?, ?, ?)",
+        [name, age, weightResult, heightResult],
+        (txObj, resultSet) => {
+          console.log(
+           "name:", name, "age:", age, "weight:", weightResult, "height:", heightResult
+          );
+        },
+        (txObj, error) => console.log(error)
+      )
+    })
   };
 
   return (
@@ -93,7 +120,7 @@ function HomeScreen({ navigation, route }) {
       <TextInput
         placeholder="Name"
         value={name}
-        onChangeText={(text) => setName(text)}
+        onChangeText={setName}
         style={{
           marginBottom: 10,
           padding: 10,
@@ -104,7 +131,7 @@ function HomeScreen({ navigation, route }) {
       <TextInput
         placeholder="Age"
         value={age}
-        onChangeText={(text) => setAge(text)}
+        onChangeText={setAge}
         keyboardType="numeric"
         style={{
           marginBottom: 10,
@@ -119,7 +146,7 @@ function HomeScreen({ navigation, route }) {
       <TextInput
         placeholder={`Weight (${weightUnit ? "lb." : "kg."})`}
         value={weight}
-        onChangeText={(text) => setWeight(text)}
+        onChangeText={setWeight}
         keyboardType="numeric"
         style={{
           marginBottom: 10,
@@ -160,7 +187,7 @@ function HomeScreen({ navigation, route }) {
             <TextInput
               placeholder="Feet"
               value={feet}
-              onChangeText={(text) => setFeet(text)}
+              onChangeText={setFeet}
               keyboardType="numeric"
               style={{
                 marginRight: 10,
@@ -173,7 +200,7 @@ function HomeScreen({ navigation, route }) {
             <TextInput
               placeholder="Inches"
               value={inch}
-              onChangeText={(text) => setInch(text)}
+              onChangeText={setInch}
               keyboardType="numeric"
               style={{
                 flex: 1,
@@ -187,7 +214,7 @@ function HomeScreen({ navigation, route }) {
           <TextInput
             placeholder="Height"
             value={height}
-            onChangeText={(text) => setHeight(text)}
+            onChangeText={setHeight}
             keyboardType="numeric"
             style={{ padding: 10, borderWidth: 1, borderColor: "gray" }}
           />
