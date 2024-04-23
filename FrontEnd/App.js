@@ -13,8 +13,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NativeWindStyleSheet } from "nativewind";
 import * as SQLite from 'expo-sqlite';
-import { handleSubmit } from "./storage";
-import Storage from "./storage";
+import Dashboard from "./component/Dashboard";
 
 NativeWindStyleSheet.setOutput({
   default: "native",
@@ -249,6 +248,10 @@ function HomeScreen({ navigation, route }) {
       >
         <Text style={{ color: "white", textAlign: "center" }}>Submit</Text>
       </TouchableOpacity>
+      <Button
+        title="Dashboard"
+        onPress={()=>navigation.navigate("Dashboard")}
+      />
     </View>
   );
 }
@@ -282,6 +285,15 @@ export default function App() {
             headerTitleStyle: {
               fontWeight: "bold",
             },
+          })}
+        />
+        <Stack.Screen 
+          name="Dashboard"
+          component={Dashboard}
+          options={()=>({
+            headerStyle: {
+              backgroundColor: "#43464b"
+            }
           })}
         />
       </Stack.Navigator>
