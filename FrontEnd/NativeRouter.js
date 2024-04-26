@@ -2,8 +2,8 @@ import * as React from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Button, TextInput } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-import { Image } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Image } from "react-native";
 
 function HomeScreen({ navigation, route }) {
   const [count, setCount] = React.useState(0);

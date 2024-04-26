@@ -12,8 +12,14 @@ import {
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NativeWindStyleSheet } from "nativewind";
-import * as SQLite from 'expo-sqlite';
+import * as SQLite from "expo-sqlite";
 import Dashboard from "./component/Dashboard";
+import BloodPressure from "./component/BloodPressure";
+import BloodSugar from "./component/BloodSugar";
+import Diagnostic from "./component/Diagnostics";
+import Pills from "./component/Pills";
+import Doctors from "./component/Doctors";
+import History from "./component/History";
 
 NativeWindStyleSheet.setOutput({
   default: "native",
@@ -38,10 +44,10 @@ function HomeScreen({ navigation, route }) {
   };
 
   //DATABASE
-  const db = SQLite.openDatabase("med-logger.db")
-  const [isLoading, setIsLoading] = useState(true)
+  const db = SQLite.openDatabase("med-logger.db");
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(()=>{
+  useEffect(() => {
     db.transaction((tx) => {
       tx.executeSql(
         "CREATE TABLE IF NOT EXISTS user_info (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, age INTEGER, weight REAL, height REAL)"
@@ -50,14 +56,14 @@ function HomeScreen({ navigation, route }) {
 
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM user_info", 
+        "SELECT * FROM user_info",
         null,
         (txObj, resultSet) => console.log(resultSet.rows._array),
         (txObj, error) => console.log(error)
-      )
+      );
     });
-    setIsLoading(false)
-  }, [])
+    setIsLoading(false);
+  }, []);
 
   const handleSubmit = () => {
     if (!name.trim()) {
@@ -88,30 +94,37 @@ function HomeScreen({ navigation, route }) {
       }
     }
 
-     // Convert units if necessary
-     let heightResult = height;
-     let weightResult = weight;
-     if (heightUnit) {
-       const totalInches = parseInt(feet) * 12 + parseInt(inch);
-       heightResult = totalInches * 2.54;
-     }
-     if (weightUnit) {
-       weightResult = parseInt(weight) * 0.45;
-     }
+    // Convert units if necessary
+    let heightResult = height;
+    let weightResult = weight;
+    if (heightUnit) {
+      const totalInches = parseInt(feet) * 12 + parseInt(inch);
+      heightResult = totalInches * 2.54;
+    }
+    if (weightUnit) {
+      weightResult = parseInt(weight) * 0.45;
+    }
 
     // Handle form submission
-      db.transaction((tx) => {
+    db.transaction((tx) => {
       tx.executeSql(
         "INSERT INTO user_info (name, age, weight, height) values (?, ?, ?, ?)",
         [name, age, weightResult, heightResult],
         (txObj, resultSet) => {
           console.log(
-           "name:", name, "age:", age, "weight:", weightResult, "height:", heightResult
+            "name:",
+            name,
+            "age:",
+            age,
+            "weight:",
+            weightResult,
+            "height:",
+            heightResult
           );
         },
         (txObj, error) => console.log(error)
-      )
-    })
+      );
+    });
   };
 
   return (
@@ -250,7 +263,7 @@ function HomeScreen({ navigation, route }) {
       </TouchableOpacity>
       <Button
         title="Dashboard"
-        onPress={()=>navigation.navigate("Dashboard")}
+        onPress={() => navigation.navigate("Dashboard")}
       />
     </View>
   );
@@ -287,13 +300,67 @@ export default function App() {
             },
           })}
         />
-        <Stack.Screen 
+        <Stack.Screen
           name="Dashboard"
           component={Dashboard}
-          options={()=>({
+          options={() => ({
             headerStyle: {
-              backgroundColor: "#43464b"
-            }
+              backgroundColor: "#800000",
+            },
+          })}
+        />
+        <Stack.Screen
+          name="Blood Pressure"
+          component={BloodPressure}
+          options={() => ({
+            headerStyle: {
+              backgroundColor: "#800000",
+            },
+          })}
+        />
+        <Stack.Screen
+          name="Blood Sugar"
+          component={BloodSugar}
+          options={() => ({
+            headerStyle: {
+              backgroundColor: "#800000",
+            },
+          })}
+        />
+        <Stack.Screen
+          name="Diagnostic Reports"
+          component={Diagnostic}
+          options={() => ({
+            headerStyle: {
+              backgroundColor: "#800000",
+            },
+          })}
+        />
+        <Stack.Screen
+          name="Pill Tracker"
+          component={Pills}
+          options={() => ({
+            headerStyle: {
+              backgroundColor: "#800000",
+            },
+          })}
+        />
+          <Stack.Screen
+          name="Your Doctors"
+          component={Doctors}
+          options={() => ({
+            headerStyle: {
+              backgroundColor: "#800000",
+            },
+          })}
+        />
+          <Stack.Screen
+          name="History"
+          component={History}
+          options={() => ({
+            headerStyle: {
+              backgroundColor: "#800000",
+            },
           })}
         />
       </Stack.Navigator>
