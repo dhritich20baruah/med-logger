@@ -137,7 +137,7 @@ function HomeScreen({ navigation, route }) {
           marginBottom: 10,
           padding: 10,
           borderWidth: 1,
-          borderColor: "gray",
+          borderColor: "#800000",
         }}
       />
       <TextInput
@@ -149,7 +149,7 @@ function HomeScreen({ navigation, route }) {
           marginBottom: 10,
           padding: 10,
           borderWidth: 1,
-          borderColor: "gray",
+          borderColor: "#800000",
         }}
       />
       <Text style={{ marginBottom: 5 }}>
@@ -164,7 +164,7 @@ function HomeScreen({ navigation, route }) {
           marginBottom: 10,
           padding: 10,
           borderWidth: 1,
-          borderColor: "gray",
+          borderColor: "#800000",
         }}
       />
       <View style={{ flexDirection: "row", marginBottom: 10 }}>
@@ -173,7 +173,7 @@ function HomeScreen({ navigation, route }) {
           style={{
             marginRight: 10,
             padding: 10,
-            backgroundColor: weightUnit ? "lightgray" : "blue",
+            backgroundColor: weightUnit ? "lightgray" : "orange",
             borderRadius: 5,
           }}
         >
@@ -183,7 +183,7 @@ function HomeScreen({ navigation, route }) {
           onPress={toggleWeightUnit}
           style={{
             padding: 10,
-            backgroundColor: weightUnit ? "blue" : "lightgray",
+            backgroundColor: weightUnit ? "orange" : "lightgray",
             borderRadius: 5,
           }}
         >
@@ -206,7 +206,7 @@ function HomeScreen({ navigation, route }) {
                 flex: 1,
                 padding: 10,
                 borderWidth: 1,
-                borderColor: "gray",
+                borderColor: "#800000",
               }}
             />
             <TextInput
@@ -218,17 +218,17 @@ function HomeScreen({ navigation, route }) {
                 flex: 1,
                 padding: 10,
                 borderWidth: 1,
-                borderColor: "gray",
+                borderColor: "#800000",
               }}
             />
           </View>
         ) : (
           <TextInput
-            placeholder="Height"
+            placeholder="Height(cm)"
             value={height}
             onChangeText={setHeight}
             keyboardType="numeric"
-            style={{ padding: 10, borderWidth: 1, borderColor: "gray" }}
+            style={{ padding: 10, borderWidth: 1, borderColor: "#800000" }}
           />
         )}
       </View>
@@ -238,7 +238,7 @@ function HomeScreen({ navigation, route }) {
           style={{
             marginRight: 10,
             padding: 10,
-            backgroundColor: heightUnit ? "lightgray" : "blue",
+            backgroundColor: heightUnit ? "lightgray" : "orange",
             borderRadius: 5,
           }}
         >
@@ -248,7 +248,7 @@ function HomeScreen({ navigation, route }) {
           onPress={toggleHeightUnit}
           style={{
             padding: 10,
-            backgroundColor: heightUnit ? "blue" : "lightgray",
+            backgroundColor: heightUnit ? "orange" : "lightgray",
             borderRadius: 5,
           }}
         >
@@ -257,7 +257,7 @@ function HomeScreen({ navigation, route }) {
       </View>
       <TouchableOpacity
         onPress={handleSubmit}
-        style={{ backgroundColor: "blue", padding: 10, borderRadius: 5 }}
+        style={{ backgroundColor: "orange", padding: 10, borderRadius: 5 }}
       >
         <Text style={{ color: "white", textAlign: "center" }}>Submit</Text>
       </TouchableOpacity>
@@ -292,7 +292,7 @@ export default function App() {
           options={({ navigation, route }) => ({
             title: "Home",
             headerStyle: {
-              backgroundColor: "#6D5ACF",
+              backgroundColor: "#800000",
             },
             headerTintColor: "#fff",
             headerTitleStyle: {
