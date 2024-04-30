@@ -9,8 +9,9 @@ const Chart = ({data}) => {
     <LineChart
       data={data}
       width={screenWidth}
-      height={220}
-      yAxisLabel="$"
+      height={300}
+      verticalLabelRotation={30}
+      yAxisLabel=""
       chartConfig={{
         backgroundColor: '#ffffff',
         backgroundGradientFrom: '#ffffff',

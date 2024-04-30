@@ -13,6 +13,29 @@ export default function BloodPressure() {
 
   const prevReadings = [{ systolic: 120, diastolic: 80, pulse: 70 }]; // Example previous readings
 
+  const pressureData = {
+    labels: [
+      "01-05-2024",
+      "02-05-2024",
+      "03-05-2024",
+      "04-05-2024",
+      "05-05-2024",
+      "06-05-2024",
+    ],
+    datasets: [
+      {
+        data: [70, 75, 78, 70, 79, 73],
+        color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
+        strokeWidth: 2, // optional
+      },
+      {
+        data: [120, 125, 128, 120, 129, 123],
+        color: (opacity = 1) => `rgba(134, 65, 204, ${opacity})`, // optional
+        strokeWidth: 2, // optional
+      }
+    ],
+  };
+
   return (
     <View>
       <RecordCard prevReadings={prevReadings} />
@@ -25,7 +48,7 @@ export default function BloodPressure() {
         setPulse={setPulse}
         submitPressure={submitPressure}
       />
-      <Chart/>
+      <Chart data={pressureData}/>
     </View>
   );
 }
