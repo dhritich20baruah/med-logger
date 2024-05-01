@@ -8,6 +8,7 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  ScrollView
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -30,10 +31,11 @@ function HomeScreen({ navigation, route }) {
   const [age, setAge] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
-  const [heightUnit, setHeightUnit] = useState(false);
-  const [weightUnit, setWeightUnit] = useState(false);
   const [feet, setFeet] = useState("");
   const [inch, setInch] = useState("");
+  const [heightUnit, setHeightUnit] = useState(false);
+  const [weightUnit, setWeightUnit] = useState(false);
+  const [users, setUsers] = useState([])
 
   const toggleWeightUnit = () => {
     setWeightUnit((prevState) => !prevState);
@@ -58,7 +60,7 @@ function HomeScreen({ navigation, route }) {
       tx.executeSql(
         "SELECT * FROM user_info",
         null,
-        (txObj, resultSet) => console.log(resultSet.rows._array),
+        (txObj, resultSet) => setUsers(resultSet.rows._array),
         (txObj, error) => console.log(error)
       );
     });
@@ -111,16 +113,15 @@ function HomeScreen({ navigation, route }) {
         "INSERT INTO user_info (name, age, weight, height) values (?, ?, ?, ?)",
         [name, age, weightResult, heightResult],
         (txObj, resultSet) => {
-          console.log(
-            "name:",
-            name,
-            "age:",
-            age,
-            "weight:",
-            weightResult,
-            "height:",
-            heightResult
-          );
+          let currentUser = [...users];
+          currentUser.push({ id: resultSet.insertId, name: name });
+          setUsers(currentUser);
+          setName("");
+          setAge("");
+          setHeight("");
+          setFeet("");
+          setInch("");
+          setWeight("")
         },
         (txObj, error) => console.log(error)
       );
@@ -128,7 +129,9 @@ function HomeScreen({ navigation, route }) {
   };
 
   return (
+    <ScrollView>
     <View style={{ flex: 1, padding: 20 }}>
+      <Text style={{textAlign: "center", color: "#800000", fontSize: 20}}>ADD NEW USER</Text>
       <TextInput
         placeholder="Name"
         value={name}
@@ -261,11 +264,21 @@ function HomeScreen({ navigation, route }) {
       >
         <Text style={{ color: "white", textAlign: "center" }}>Submit</Text>
       </TouchableOpacity>
-      <Button
-        title="Dashboard"
-        onPress={() => navigation.navigate("Dashboard")}
-      />
+  
+       <Text style={{textAlign: "center", color: "#800000", fontSize: 20, margin: 10}}>OR CONTINUE AS</Text>
+       <View>
+        {users.map((item)=>{
+          return(
+            <View key={item.id}>
+                <TouchableOpacity onPress={() => navigation.navigate("Dashboard")}>
+                  <Text style={{color: "white", margin: 5, padding: 5, textAlign: "center", backgroundColor: "#800000", fontSize: 20, elevation: 5}}>{item.name}</Text>
+                </TouchableOpacity>
+            </View>
+          )
+        })}
+       </View>
     </View>
+    </ScrollView>
   );
 }
 
