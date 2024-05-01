@@ -60,7 +60,9 @@ function HomeScreen({ navigation, route }) {
       tx.executeSql(
         "SELECT * FROM user_info",
         null,
-        (txObj, resultSet) => setUsers(resultSet.rows._array),
+        (txObj, resultSet) => {setUsers(resultSet.rows._array)
+        console.log(users)
+        },
         (txObj, error) => console.log(error)
       );
     });
@@ -270,7 +272,7 @@ function HomeScreen({ navigation, route }) {
         {users.map((item)=>{
           return(
             <View key={item.id}>
-                <TouchableOpacity onPress={() => navigation.navigate("Dashboard")}>
+                <TouchableOpacity onPress={() => navigation.navigate("Dashboard", {userID: item.id})}>
                   <Text style={{color: "white", margin: 5, padding: 5, textAlign: "center", backgroundColor: "#800000", fontSize: 20, elevation: 5}}>{item.name}</Text>
                 </TouchableOpacity>
             </View>
@@ -288,7 +290,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Home"
+        initialRouteName="Med Logger"
         screenOptions={{
           headerStyle: {
             backgroundColor: "#f4511e",
@@ -300,10 +302,10 @@ export default function App() {
         }}
       >
         <Stack.Screen
-          name="Home"
+          name="Med Logger"
           component={HomeScreen}
           options={({ navigation, route }) => ({
-            title: "Home",
+            title: "Med Logger",
             headerStyle: {
               backgroundColor: "#800000",
             },
