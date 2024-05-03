@@ -1,17 +1,50 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Button, StyleSheet } from "react-native";
 import Chart from "./Chart";
+import * as SQLite from "expo-sqlite";
 
-export default function BloodPressure() {
+export default function BloodPressure({ navigation, route}) {
+  const { userID } = route.params;
+
   const [systolic, setSystolic] = useState("");
   const [diastolic, setDiastolic] = useState("");
   const [pulse, setPulse] = useState("");
+  const [prevReadings, setPrevReadings] = useState([{
+    "date": "",
+    "systolic": "",
+    "diastolic": "",
+    "pulse": ""
+  }])
+
+  //DATABASE
+  const db = SQLite.openDatabase("med-logger.db");
+
+  useEffect(() => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS blood_pressure (id INTEGER PRIMARY KEY AUTOINCREMENT, systolic INTEGER, diastolic INTEGER, pulse INTEGER, user_id INTEGER)"
+      );
+    });
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM blood_pressure WHERE id = ?",
+        [userID],
+        (txObj, resultSet) => {
+          setUsers(resultSet.rows._array);
+          console.log(users);
+        },
+        (txObj, error) => console.log(error)
+      );
+    });
+    setIsLoading(false);
+  }, []);
 
   const submitPressure = () => {
     // Add logic to submit pressure
   };
 
-  const prevReadings = [{ systolic: 120, diastolic: 80, pulse: 70 }]; // Example previous readings
+  // const prevReadings = [{ systolic: 120, diastolic: 80, pulse: 70 }]; // Example previous readings
 
   const pressureData = {
     labels: [
@@ -32,7 +65,7 @@ export default function BloodPressure() {
         data: [120, 125, 128, 120, 129, 123],
         color: (opacity = 1) => `rgba(134, 65, 204, ${opacity})`, // optional
         strokeWidth: 2, // optional
-      }
+      },
     ],
   };
 
@@ -48,7 +81,7 @@ export default function BloodPressure() {
         setPulse={setPulse}
         submitPressure={submitPressure}
       />
-      <Chart data={pressureData}/>
+      <Chart data={pressureData} />
     </View>
   );
 }
