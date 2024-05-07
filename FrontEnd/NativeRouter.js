@@ -193,3 +193,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 });
+
+
+const modifyTable = () => {
+  // Execute SQL query to add a new column
+  db.transaction(tx => {
+    tx.executeSql(
+      'ALTER TABLE blood_pressure ADD COLUMN date TEXT',
+      [],
+      (_, result) => {
+        console.log('Table modified successfully');
+      },
+      (_, error) => {
+        console.log('Error modifying table:', error);
+      }
+    );
+  });
+};
+
+<Button title="Modify Table" onPress={modifyTable} />

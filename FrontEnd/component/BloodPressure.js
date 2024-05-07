@@ -5,7 +5,6 @@ import * as SQLite from "expo-sqlite";
 
 export default function BloodPressure({ navigation, route}) {
   const { userID } = route.params;
-
   const [systolic, setSystolic] = useState("");
   const [diastolic, setDiastolic] = useState("");
   const [pulse, setPulse] = useState("");
@@ -17,12 +16,12 @@ export default function BloodPressure({ navigation, route}) {
   }])
 
   //DATABASE
-  const db = SQLite.openDatabase("med-logger.db");
+  const db = SQLite.openDatabase("med-logger2.db");
 
   useEffect(() => {
     db.transaction((tx) => {
       tx.executeSql(
-        "CREATE TABLE IF NOT EXISTS blood_pressure (id INTEGER PRIMARY KEY AUTOINCREMENT, systolic INTEGER, diastolic INTEGER, pulse INTEGER, user_id INTEGER)"
+        "CREATE TABLE IF NOT EXISTS blood_pressure (id INTEGER PRIMARY KEY AUTOINCREMENT, systolic INTEGER, diastolic INTEGER, pulse INTEGER, user_id INTEGER, date TEXT)"
       );
     });
 
@@ -31,17 +30,41 @@ export default function BloodPressure({ navigation, route}) {
         "SELECT * FROM blood_pressure WHERE id = ?",
         [userID],
         (txObj, resultSet) => {
-          setUsers(resultSet.rows._array);
-          console.log(users);
+          setPrevReadings(resultSet.rows._array);
+          console.log(prevReadings);
         },
         (txObj, error) => console.log(error)
       );
     });
-    setIsLoading(false);
+    // setIsLoading(false);
   }, []);
 
   const submitPressure = () => {
-    // Add logic to submit pressure
+    let dateString = new Date().toISOString()
+    let date = dateString.slice(0, dateString.indexOf("T")).split("-").reverse().join("-")
+    const pressureObj = {
+      date: dateString.slice(0, dateString.indexOf("T")).split("-").reverse().join("-"),
+      systolic: parseInt(systolic),
+      diastolic: parseInt(diastolic),
+      pulse: parseInt(pulse),
+      user_id: userID
+    }
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        "INSERT INTO blood_pressure (systolic, diastolic, pulse, user_id, date) values (?, ?, ?, ?, ?)",
+        [systolic, diastolic, pulse, userID, date],
+        (txObj, resultSet) => {
+          let lastReading = [...prevReadings];
+          lastReading.push({ id: resultSet.insertId, systolic: systolic, diastolic: diastolic, pulse: pulse, date: date });
+          setPrevReadings(lastReading);
+          setSystolic("");
+          setDiastolic("");
+          setPulse("");
+        },
+        (txObj, error) => console.log(error)
+      );
+    });
   };
 
   // const prevReadings = [{ systolic: 120, diastolic: 80, pulse: 70 }]; // Example previous readings
@@ -134,7 +157,7 @@ const AddRecordForm = ({
             style={styles.input}
             keyboardType="numeric"
             value={systolic}
-            onChangeText={(text) => setSystolic(text)}
+            onChangeText={setSystolic}
             placeholder="0"
           />
         </View>
@@ -144,7 +167,7 @@ const AddRecordForm = ({
             style={styles.input}
             keyboardType="numeric"
             value={diastolic}
-            onChangeText={(text) => setDiastolic(text)}
+            onChangeText={setDiastolic}
             placeholder="0"
           />
         </View>
@@ -154,7 +177,7 @@ const AddRecordForm = ({
             style={styles.input}
             keyboardType="numeric"
             value={pulse}
-            onChangeText={(text) => setPulse(text)}
+            onChangeText={setPulse}
             placeholder="0"
           />
         </View>

@@ -46,7 +46,7 @@ function HomeScreen({ navigation, route }) {
   };
 
   //DATABASE
-  const db = SQLite.openDatabase("med-logger.db");
+  const db = SQLite.openDatabase("med-logger2.db");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

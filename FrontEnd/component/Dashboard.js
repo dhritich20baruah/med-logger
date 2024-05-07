@@ -8,7 +8,7 @@ const Dashboard = ({ navigation, route }) => {
   const { userID } = route.params;
 
   //DATABASE
-  const db = SQLite.openDatabase("med-logger.db");
+  const db = SQLite.openDatabase("med-logger2.db");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ const Dashboard = ({ navigation, route }) => {
             <FontAwesome name="heart-pulse" size={50} color="#800000" />
             <Text style={styles.tileText}>Blood Pressure</Text>
             <TouchableOpacity
-              onPress={() => navigation.navigate("Blood Pressure")}
+              onPress={() => navigation.navigate("Blood Pressure", {userID})}
             >
               <Text style={styles.tileButton}>RECORD</Text>
             </TouchableOpacity>
