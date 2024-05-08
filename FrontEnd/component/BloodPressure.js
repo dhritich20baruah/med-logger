@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import { View, Text, TextInput, Button, StyleSheet, Modal } from "react-native";
 import Chart from "./Chart";
 import * as SQLite from "expo-sqlite";
 
@@ -9,10 +9,10 @@ export default function BloodPressure({ navigation, route}) {
   const [diastolic, setDiastolic] = useState("");
   const [pulse, setPulse] = useState("");
   const [prevReadings, setPrevReadings] = useState([{
-    "date": "",
-    "systolic": "",
-    "diastolic": "",
-    "pulse": ""
+    "date": "01-01-2024",
+    "systolic": "120",
+    "diastolic": "70",
+    "pulse": "60"
   }])
 
   //DATABASE
@@ -27,16 +27,22 @@ export default function BloodPressure({ navigation, route}) {
 
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM blood_pressure WHERE id = ?",
+        "SELECT * FROM blood_pressure WHERE user_id = ?",
         [userID],
         (txObj, resultSet) => {
-          setPrevReadings(resultSet.rows._array);
-          console.log(prevReadings);
+          const readings = resultSet.rows._array.map((item) => ({
+            date: item.date,
+            systolic: item.systolic,
+            diastolic: item.diastolic,
+            pulse: item.pulse,
+          }));
+          console.log(readings)
+          // Update the state with the fetched readings
+          setPrevReadings(readings);
         },
         (txObj, error) => console.log(error)
       );
     });
-    // setIsLoading(false);
   }, []);
 
   const submitPressure = () => {
@@ -67,25 +73,17 @@ export default function BloodPressure({ navigation, route}) {
     });
   };
 
-  // const prevReadings = [{ systolic: 120, diastolic: 80, pulse: 70 }]; // Example previous readings
 
   const pressureData = {
-    labels: [
-      "01-05-2024",
-      "02-05-2024",
-      "03-05-2024",
-      "04-05-2024",
-      "05-05-2024",
-      "06-05-2024",
-    ],
+    labels: prevReadings.map((item) => item.date).slice(-7),
     datasets: [
       {
-        data: [70, 75, 78, 70, 79, 73],
+        data: prevReadings.map((item) => item.systolic).slice(-7),
         color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
         strokeWidth: 2, // optional
       },
       {
-        data: [120, 125, 128, 120, 129, 123],
+        data: prevReadings.map((item) => item.diastolic).slice(-7),
         color: (opacity = 1) => `rgba(134, 65, 204, ${opacity})`, // optional
         strokeWidth: 2, // optional
       },
@@ -104,12 +102,15 @@ export default function BloodPressure({ navigation, route}) {
         setPulse={setPulse}
         submitPressure={submitPressure}
       />
+      <Text style={{textAlign: "center", margin: 10, color: "#800000"}}>Last Seven Blood Pressure Readings</Text>
       <Chart data={pressureData} />
     </View>
   );
 }
 
 const RecordCard = ({ prevReadings }) => {
+  const [modalVisible, setModalVisible] = useState(false);
+
   return (
     <View style={styles.card}>
       <Text style={styles.cardTitle}>Last Record</Text>
@@ -133,7 +134,31 @@ const RecordCard = ({ prevReadings }) => {
           </Text>
         </View>
       </View>
-      <Button title="VIEW ALL" color="#FFA500" />
+      <Button title="VIEW ALL" color="#FFA500" onPress={() => setModalVisible(true)}/>
+      <View style={styles.container}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(false);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>This is a modal!</Text>
+            <Button
+              onPress={() => setModalVisible(false)}
+              title="Close Modal"
+            />
+          </View>
+        </View>
+      </Modal>
+      <Button
+        onPress={() => setModalVisible(true)}
+        title="Open Modal"
+      />
+    </View>
     </View>
   );
 };
@@ -242,6 +267,11 @@ const styles = StyleSheet.create({
     color: "#800000",
     marginBottom: 5,
   },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   input: {
     borderWidth: 1,
     borderColor: "#800000",
@@ -249,5 +279,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     width: "80%",
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
   },
 });
