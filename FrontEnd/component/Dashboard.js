@@ -41,7 +41,7 @@ const Dashboard = ({ navigation, route }) => {
             <FontAwesome name="droplet" size={50} color="#800000" />
             <Text style={styles.tileText}>Blood Sugar</Text>
             <TouchableOpacity
-              onPress={() => navigation.navigate("Blood Sugar")}
+              onPress={() => navigation.navigate("Blood Sugar", {userID})}
             >
               <Text style={styles.tileButton}>RECORD</Text>
             </TouchableOpacity>

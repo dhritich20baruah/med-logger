@@ -9,28 +9,49 @@ import {
   ScrollView,
 } from "react-native";
 import Chart from "./Chart";
+import * as SQLite from "expo-sqlite";
 
-export default function BloodSugar() {
-  const [fasting, setFasting] = useState([{ date: "", type: "", sugar: "" }]);
-  const [postprandial, setPostprandial] = useState([
-    { date: "", type: "", sugar: "" },
+export default function BloodSugar({ route }) {
+  const { userID } = route.params;
+  const [fasting, setFasting] = useState([
+    { date: "01-01-2024", type: "Fasting", sugar: "90" },
   ]);
-  const [random, setRandom] = useState([{ date: "", type: "", sugar: "" }]);
+  const [postprandial, setPostprandial] = useState([
+    { date: "01-01-2024", type: "Postprandial", sugar: "100" },
+  ]);
+  const [random, setRandom] = useState([
+    { date: "01-01-2024", type: "Random", sugar: "100" },
+  ]);
   const [mgDL, setMgDL] = useState(true);
+  const [testType, settestType] = useState(""); // State to track selected option
   const [sugarValue, setSugarValue] = useState(0);
 
+   //DATABASE
+   const db = SQLite.openDatabase("med-logger2.db");
+
   const toggleMgDL = () => {
-    setMgDL(!mgDL);
+    setMgDL(mgDL => !mgDL);
   };
 
-  const [selectedOption, setSelectedOption] = useState(""); // State to track selected option
 
   const handleSelect = (option) => {
-    setSelectedOption(option);
+    settestType(option);
   };
 
   const handleSubmit = () => {
     // Handle form submission here
+    let dateString = new Date().toISOString();
+    const sugarObj = {
+      date: dateString
+        .slice(0, dateString.indexOf("T"))
+        .split("-")
+        .reverse()
+        .join("-"),
+      type: testType,
+      sugar: mgDL ? sugarValue : sugarValue*0.05,
+      user_id: userID,
+    };
+    console.log(sugarObj)
   };
 
   // CHART DATA
@@ -100,7 +121,7 @@ export default function BloodSugar() {
                   ? fasting[fasting.length - 1].sugar
                   : fasting[fasting.length - 1].sugar * 0.05}
               </Text>
-              <Text style={styles.unit}>{mgDL ? "(mmol/L)" : "(mg/dL)"}</Text>
+              <Text style={styles.unit}>{!mgDL ? "(mmol/L)" : "(mg/dL)"}</Text>
             </View>
             <View style={styles.recordItem}>
               <Text style={styles.label}>Postprandial (PP)</Text>
@@ -109,7 +130,7 @@ export default function BloodSugar() {
                   ? postprandial[postprandial.length - 1].sugar
                   : postprandial[postprandial.length - 1].sugar * 0.05}
               </Text>
-              <Text style={styles.unit}>{mgDL ? "(mmol/L)" : "(mg/dL)"}</Text>
+              <Text style={styles.unit}>{!mgDL ? "(mmol/L)" : "(mg/dL)"}</Text>
             </View>
             <View style={styles.recordItem}>
               <Text style={styles.label}>Random</Text>
@@ -118,7 +139,7 @@ export default function BloodSugar() {
                   ? random[random.length - 1].sugar
                   : random[random.length - 1].sugar * 0.05}
               </Text>
-              <Text style={styles.unit}>{mgDL ? "(mmol/L)" : "(mg/dL)"}</Text>
+              <Text style={styles.unit}>{!mgDL ? "(mmol/L)" : "(mg/dL)"}</Text>
             </View>
           </View>
           <Button title="VIEW HISTORY" onPress={() => {}} color="#FFA500" />
@@ -153,21 +174,21 @@ export default function BloodSugar() {
               style={{
                 marginRight: 10,
                 padding: 10,
-                backgroundColor: mgDL ? "lightgray" : "orange",
+                backgroundColor: mgDL ? "orange" : "lightgray",
                 borderRadius: 5,
               }}
             >
-              <Text style={{ color: mgDL ? "black" : "white" }}>mg/dL</Text>
+              <Text style={{ color: mgDL ? "white" : "black" }}>mg/dL</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={toggleMgDL}
               style={{
                 padding: 10,
-                backgroundColor: mgDL ? "orange" : "lightgray",
+                backgroundColor: !mgDL ? "orange" : "lightgray",
                 borderRadius: 5,
               }}
             >
-              <Text style={{ color: mgDL ? "white" : "black" }}>mmol/l</Text>
+              <Text style={{ color: !mgDL ? "white" : "black" }}>mmol/l</Text>
             </TouchableOpacity>
           </View>
 
@@ -180,7 +201,7 @@ export default function BloodSugar() {
               <TouchableOpacity
                 style={[
                   styles.radioButton,
-                  selectedOption === "Fasting" && styles.selectedButton,
+                  testType === "Fasting" && styles.selectedButton,
                 ]}
                 onPress={() => handleSelect("Fasting")}
               >
@@ -189,7 +210,7 @@ export default function BloodSugar() {
               <TouchableOpacity
                 style={[
                   styles.radioButton,
-                  selectedOption === "Postprandial" && styles.selectedButton,
+                  testType === "Postprandial" && styles.selectedButton,
                 ]}
                 onPress={() => handleSelect("Postprandial")}
               >
@@ -198,17 +219,17 @@ export default function BloodSugar() {
               <TouchableOpacity
                 style={[
                   styles.radioButton,
-                  selectedOption === "Random" && styles.selectedButton,
+                  testType === "Random" && styles.selectedButton,
                 ]}
                 onPress={() => handleSelect("Random")}
               >
                 <Text style={styles.radioText}>Random</Text>
               </TouchableOpacity>
             </View>
-            <Text style={styles.selectedOptionText}>
-              Selected option: {selectedOption}
+            <Text style={styles.testTypeText}>
+              Selected option: {testType}
             </Text>
-            {selectedOption && (
+            {testType && (
               <View
                 style={{
                   display: "flex",
@@ -227,7 +248,7 @@ export default function BloodSugar() {
                   }}
                   keyboardType="numeric"
                   value={sugarValue.toString()}
-                  onChangeText={(text) => setSugarValue(text)}
+                  onChangeText={setSugarValue}
                 />
                 <Button title="ADD" onPress={handleSubmit} color="orange" />
               </View>
@@ -237,11 +258,17 @@ export default function BloodSugar() {
 
         {/* CHARTS */}
         <View style={{ margin: 10 }}>
-          <Text style={{textAlign: "center", color: "#800000"}}>Last Seven Fasting Blood Sugar Readings</Text>
+          <Text style={{ textAlign: "center", color: "#800000" }}>
+            Last Seven Fasting Blood Sugar Readings
+          </Text>
           <Chart data={fbsData} />
-          <Text style={{textAlign: "center", color: "#800000"}}>Last Seven Postprandial Blood Sugar Readings</Text>
+          <Text style={{ textAlign: "center", color: "#800000" }}>
+            Last Seven Postprandial Blood Sugar Readings
+          </Text>
           <Chart data={pbsData} />
-          <Text style={{textAlign: "center", color: "#800000"}}>Last Seven Random Blood Sugar Readings</Text>
+          <Text style={{ textAlign: "center", color: "#800000" }}>
+            Last Seven Random Blood Sugar Readings
+          </Text>
           <Chart data={rbsData} />
         </View>
       </View>
@@ -315,7 +342,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#000",
   },
-  selectedOptionText: {
+  testTypeText: {
     marginTop: 20,
     fontSize: 16,
     color: "#800000",
