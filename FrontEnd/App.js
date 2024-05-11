@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { NativeWindStyleSheet } from "nativewind";
 import * as SQLite from "expo-sqlite";
 import Dashboard from "./component/Dashboard";
 import BloodPressure from "./component/BloodPressure";
@@ -21,10 +20,7 @@ import Diagnostic from "./component/Diagnostics";
 import Pills from "./component/Pills";
 import Doctors from "./component/Doctors";
 import History from "./component/History";
-
-NativeWindStyleSheet.setOutput({
-  default: "native",
-});
+import DeleteDatabaseScreen from "./component/DataBase";
 
 function HomeScreen({ navigation, route }) {
   const [name, setName] = useState("");
@@ -279,6 +275,7 @@ function HomeScreen({ navigation, route }) {
           )
         })}
        </View>
+       <Button onPress={()=>navigation.navigate("delete db")} title="delete db"/>
     </View>
     </ScrollView>
   );
@@ -306,6 +303,20 @@ export default function App() {
           component={HomeScreen}
           options={({ navigation, route }) => ({
             title: "Med Logger",
+            headerStyle: {
+              backgroundColor: "#800000",
+            },
+            headerTintColor: "#fff",
+            headerTitleStyle: {
+              fontWeight: "bold",
+            },
+          })}
+        />
+        <Stack.Screen
+          name="delete db"
+          component={DeleteDatabaseScreen}
+          options={({ navigation, route }) => ({
+            title: "deleted db",
             headerStyle: {
               backgroundColor: "#800000",
             },

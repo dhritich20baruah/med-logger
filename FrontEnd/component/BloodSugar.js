@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,25 +14,60 @@ import * as SQLite from "expo-sqlite";
 export default function BloodSugar({ route }) {
   const { userID } = route.params;
   const [fasting, setFasting] = useState([
-    { date: "01-01-2024", type: "Fasting", sugar: "90" },
+    { date: "01-01-2024", testType: "Fasting", sugarValue: "90" },
   ]);
   const [postprandial, setPostprandial] = useState([
-    { date: "01-01-2024", type: "Postprandial", sugar: "100" },
+    { date: "01-01-2024", testType: "Postprandial", sugarValue: "100" },
   ]);
   const [random, setRandom] = useState([
-    { date: "01-01-2024", type: "Random", sugar: "100" },
+    { date: "01-01-2024", testType: "Random", sugarValue: "100" },
   ]);
   const [mgDL, setMgDL] = useState(true);
-  const [testType, settestType] = useState(""); // State to track selected option
+  const [testType, settestType] = useState("");
   const [sugarValue, setSugarValue] = useState(0);
 
-   //DATABASE
-   const db = SQLite.openDatabase("med-logger2.db");
+  //DATABASE
+  const db = SQLite.openDatabase("med-logger2.db");
+
+  useEffect(() => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS blood_sugar (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, test_type text, sugar_value INTEGER, user_id INTEGER)"
+      );
+    });
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM blood_sugar WHERE user_id = ?",
+        [userID],
+        (txObj, resultSet) => {
+          const readings = resultSet.rows._array.map((item) => ({
+            id: item.id,
+            date: item.date,
+            testType: item.test_type,
+            sugarValue: item.sugar_value,
+          }));
+          // Update the state with the fetched readings
+          const fastingSugar = readings.filter(
+            (item) => item.testType == "Fasting"
+          );
+          setFasting(fastingSugar);
+          const ppSugar = readings.filter(
+            (item) => item.testType == "Postprandial"
+          );
+          setPostprandial(ppSugar);
+          const RandomSugar = readings.filter(
+            (item) => item.testType == "Random"
+          );
+          setRandom(RandomSugar);
+        },
+        (txObj, error) => console.log(error)
+      );
+    });
+  }, []);
 
   const toggleMgDL = () => {
-    setMgDL(mgDL => !mgDL);
+    setMgDL((mgDL) => !mgDL);
   };
-
 
   const handleSelect = (option) => {
     settestType(option);
@@ -41,73 +76,70 @@ export default function BloodSugar({ route }) {
   const handleSubmit = () => {
     // Handle form submission here
     let dateString = new Date().toISOString();
-    const sugarObj = {
-      date: dateString
-        .slice(0, dateString.indexOf("T"))
-        .split("-")
-        .reverse()
-        .join("-"),
-      type: testType,
-      sugar: mgDL ? sugarValue : sugarValue*0.05,
-      user_id: userID,
-    };
-    console.log(sugarObj)
+    let date = dateString
+      .slice(0, dateString.indexOf("T"))
+      .split("-")
+      .reverse()
+      .join("-");
+    let sugar = mgDL ? sugarValue : sugarValue * 18;
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        "INSERT INTO blood_sugar (date, test_type, sugar_value, user_id) values (?, ?, ?, ?)",
+        [date, testType, sugar, userID],
+        (txObj, resultSet) => {
+          console.log("values added");
+          setSugarValue("");
+        },
+        (txObj, error) => console.log(error)
+      );
+    });
   };
 
   // CHART DATA
+  const dateArr = random.map((item) => item.date)
+  const valueArr = random
+  .map((item) => item.sugarValue)
+  .slice(random.length - 7, random.length)
+  console.log(dateArr, valueArr)
   const fbsData = {
-    labels: [
-      "01-05-2024",
-      "02-05-2024",
-      "03-05-2024",
-      "04-05-2024",
-      "05-05-2024",
-      "06-05-2024",
-    ],
+    labels: fasting.map((item) => item.date),
     datasets: [
       {
-        data: [90, 95, 88, 90, 89, 93],
+        data: fasting
+          .map((item) => item.sugarValue)
+          .slice(fasting.length - 7, fasting.length),
+        // data: [90,91,92],
         color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
         strokeWidth: 2, // optional
       },
     ],
   };
 
-  const pbsData = {
-    labels: [
-      "01-05-2024",
-      "02-05-2024",
-      "03-05-2024",
-      "04-05-2024",
-      "05-05-2024",
-      "06-05-2024",
-    ],
-    datasets: [
-      {
-        data: [90, 95, 88, 90, 89, 93],
-        color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
-        strokeWidth: 2, // optional
-      },
-    ],
-  };
+  // const pbsData = {
+  //   labels: postprandial.map((item)=> item.date),
+  //   datasets: [
+  //     {
+  //       data: postprandial.map((item)=> item.sugarValue).slice(postprandial.length-7, postprandial.length),
+  //       // data: [90,91,92],
+  //       color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
+  //       strokeWidth: 2, // optional
+  //     },
+  //   ],
+  // };
 
   const rbsData = {
-    labels: [
-      "01-05-2024",
-      "02-05-2024",
-      "03-05-2024",
-      "04-05-2024",
-      "05-05-2024",
-      "06-05-2024",
-    ],
+    labels: random.map((item)=> item.date),
     datasets: [
       {
-        data: [90, 95, 88, 90, 89, 93],
+        // data: random.map((item)=> item.sugarValue),
+        data: [90,91,92],
         color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
         strokeWidth: 2, // optional
       },
     ],
   };
+
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -118,8 +150,8 @@ export default function BloodSugar({ route }) {
               <Text style={styles.label}>Fasting</Text>
               <Text style={styles.value}>
                 {mgDL
-                  ? fasting[fasting.length - 1].sugar
-                  : fasting[fasting.length - 1].sugar * 0.05}
+                  ? fasting[fasting.length - 1].sugarValue
+                  : fasting[fasting.length - 1].sugarValue * 0.05}
               </Text>
               <Text style={styles.unit}>{!mgDL ? "(mmol/L)" : "(mg/dL)"}</Text>
             </View>
@@ -127,8 +159,8 @@ export default function BloodSugar({ route }) {
               <Text style={styles.label}>Postprandial (PP)</Text>
               <Text style={styles.value}>
                 {mgDL
-                  ? postprandial[postprandial.length - 1].sugar
-                  : postprandial[postprandial.length - 1].sugar * 0.05}
+                  ? postprandial[postprandial.length - 1].sugarValue
+                  : postprandial[postprandial.length - 1].sugarValue * 0.05}
               </Text>
               <Text style={styles.unit}>{!mgDL ? "(mmol/L)" : "(mg/dL)"}</Text>
             </View>
@@ -136,8 +168,8 @@ export default function BloodSugar({ route }) {
               <Text style={styles.label}>Random</Text>
               <Text style={styles.value}>
                 {mgDL
-                  ? random[random.length - 1].sugar
-                  : random[random.length - 1].sugar * 0.05}
+                  ? random[random.length - 1].sugarValue
+                  : random[random.length - 1].sugarValue * 0.05}
               </Text>
               <Text style={styles.unit}>{!mgDL ? "(mmol/L)" : "(mg/dL)"}</Text>
             </View>
@@ -226,30 +258,18 @@ export default function BloodSugar({ route }) {
                 <Text style={styles.radioText}>Random</Text>
               </TouchableOpacity>
             </View>
-            <Text style={styles.testTypeText}>
-              Selected option: {testType}
-            </Text>
+            <Text style={styles.testTypeText}>Selected option: {testType}</Text>
             {testType && (
-              <View
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "space-evenly",
-                  margin: 10,
-                }}
-              >
+              <View style={styles.addView}>
                 <TextInput
-                  style={{
-                    height: 50,
-                    width: 50,
-                    borderBottomWidth: 2,
-                    borderBottomColor: "#800000",
-                    fontSize: 20,
-                  }}
+                  style={styles.addInput}
                   keyboardType="numeric"
                   value={sugarValue.toString()}
                   onChangeText={setSugarValue}
                 />
+                <Text style={styles.unit2}>
+                  {!mgDL ? "(mmol/L)" : "(mg/dL)"}
+                </Text>
                 <Button title="ADD" onPress={handleSubmit} color="orange" />
               </View>
             )}
@@ -258,14 +278,14 @@ export default function BloodSugar({ route }) {
 
         {/* CHARTS */}
         <View style={{ margin: 10 }}>
-          <Text style={{ textAlign: "center", color: "#800000" }}>
+          {/* <Text style={{ textAlign: "center", color: "#800000" }}>
             Last Seven Fasting Blood Sugar Readings
           </Text>
-          <Chart data={fbsData} />
-          <Text style={{ textAlign: "center", color: "#800000" }}>
+          <Chart data={fbsData} /> */}
+          {/* <Text style={{ textAlign: "center", color: "#800000" }}>
             Last Seven Postprandial Blood Sugar Readings
           </Text>
-          <Chart data={pbsData} />
+          <Chart data={pbsData} /> */}
           <Text style={{ textAlign: "center", color: "#800000" }}>
             Last Seven Random Blood Sugar Readings
           </Text>
@@ -320,6 +340,10 @@ const styles = StyleSheet.create({
   unit: {
     color: "white",
   },
+  unit2: {
+    color: "#800000",
+    margin: 10,
+  },
   radioContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
@@ -346,5 +370,18 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 16,
     color: "#800000",
+  },
+  addInput: {
+    height: 50,
+    width: 50,
+    borderBottomWidth: 2,
+    borderBottomColor: "#800000",
+    fontSize: 20,
+  },
+  addView: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    margin: 10,
   },
 });
