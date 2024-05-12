@@ -14,13 +14,13 @@ import * as SQLite from "expo-sqlite";
 export default function BloodSugar({ route }) {
   const { userID } = route.params;
   const [fasting, setFasting] = useState([
-    { date: "01-01-2024", testType: "Fasting", sugarValue: "90" },
+    { date: "01-01-2024", testType: "Fasting", sugarValue: 90 },
   ]);
   const [postprandial, setPostprandial] = useState([
-    { date: "01-01-2024", testType: "Postprandial", sugarValue: "100" },
+    { date: "01-01-2024", testType: "Postprandial", sugarValue: 100 },
   ]);
   const [random, setRandom] = useState([
-    { date: "01-01-2024", testType: "Random", sugarValue: "100" },
+    { date: "01-01-2024", testType: "Random", sugarValue: 100 },
   ]);
   const [mgDL, setMgDL] = useState(true);
   const [testType, settestType] = useState("");
@@ -88,7 +88,36 @@ export default function BloodSugar({ route }) {
         "INSERT INTO blood_sugar (date, test_type, sugar_value, user_id) values (?, ?, ?, ?)",
         [date, testType, sugar, userID],
         (txObj, resultSet) => {
-          console.log("values added");
+          if(testType == "Fasting"){
+            let lastReading = [...fasting];
+            lastReading.push({
+              id: resultSet.insertId,
+              testType: testType,
+              sugarValue: sugarValue,
+              date: date,
+            });
+            setFasting(lastReading)
+          }
+          if(testType == "Postprandial"){
+            let lastReading = [...postprandial];
+            lastReading.push({
+              id: resultSet.insertId,
+              testType: testType,
+              sugarValue: sugarValue,
+              date: date,
+            });
+            setPostprandial(lastReading)
+          }
+          if(testType == "Random"){
+            let lastReading = [...random];
+            lastReading.push({
+              id: resultSet.insertId,
+              testType: testType,
+              sugarValue: sugarValue,
+              date: date,
+            });
+            setRandom(lastReading)
+          }
           setSugarValue("");
         },
         (txObj, error) => console.log(error)
@@ -97,43 +126,33 @@ export default function BloodSugar({ route }) {
   };
 
   // CHART DATA
-  const dateArr = random.map((item) => item.date)
-  const valueArr = random
-  .map((item) => item.sugarValue)
-  .slice(random.length - 7, random.length)
-  console.log(dateArr, valueArr)
   const fbsData = {
-    labels: fasting.map((item) => item.date),
+    labels: fasting.map((item) => item.date).slice(-7),
     datasets: [
       {
-        data: fasting
-          .map((item) => item.sugarValue)
-          .slice(fasting.length - 7, fasting.length),
-        // data: [90,91,92],
+        data: fasting.length >= 7 ? fasting.map((item) => item.sugarValue).slice(-7) : fasting.map((item) => item.sugarValue),
         color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
         strokeWidth: 2, // optional
       },
     ],
   };
 
-  // const pbsData = {
-  //   labels: postprandial.map((item)=> item.date),
-  //   datasets: [
-  //     {
-  //       data: postprandial.map((item)=> item.sugarValue).slice(postprandial.length-7, postprandial.length),
-  //       // data: [90,91,92],
-  //       color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
-  //       strokeWidth: 2, // optional
-  //     },
-  //   ],
-  // };
-
-  const rbsData = {
-    labels: random.map((item)=> item.date),
+  const pbsData = {
+    labels: postprandial.map((item)=> item.date).slice(-7),
     datasets: [
       {
-        // data: random.map((item)=> item.sugarValue),
-        data: [90,91,92],
+        data: postprandial.length >= 7 ? postprandial.map((item)=> item.sugarValue).slice(-7) : postprandial.map((item)=> item.sugarValue),
+        color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
+        strokeWidth: 2, // optional
+      },
+    ],
+  };
+
+  const rbsData = {
+    labels: random.map((item) => item.date).slice(-7),
+    datasets: [
+      {
+        data: random.length >= 7 ? random.map((item)=> item.sugarValue).slice(-7) : random.map((item)=> item.sugarValue),
         color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
         strokeWidth: 2, // optional
       },
@@ -278,14 +297,14 @@ export default function BloodSugar({ route }) {
 
         {/* CHARTS */}
         <View style={{ margin: 10 }}>
-          {/* <Text style={{ textAlign: "center", color: "#800000" }}>
+          <Text style={{ textAlign: "center", color: "#800000" }}>
             Last Seven Fasting Blood Sugar Readings
           </Text>
-          <Chart data={fbsData} /> */}
-          {/* <Text style={{ textAlign: "center", color: "#800000" }}>
+          <Chart data={fbsData} />
+          <Text style={{ textAlign: "center", color: "#800000" }}>
             Last Seven Postprandial Blood Sugar Readings
           </Text>
-          <Chart data={pbsData} /> */}
+          <Chart data={pbsData} />
           <Text style={{ textAlign: "center", color: "#800000" }}>
             Last Seven Random Blood Sugar Readings
           </Text>
