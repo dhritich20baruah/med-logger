@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Modal
 } from "react-native";
 import Chart from "./Chart";
 import * as SQLite from "expo-sqlite";
@@ -22,9 +23,13 @@ export default function BloodSugar({ route }) {
   const [random, setRandom] = useState([
     { date: "01-01-2024", testType: "Random", sugarValue: 100 },
   ]);
+  const [prevReadings, setPrevReadings] = useState([
+    { date: "01-01-2024", testType: "Fasting", sugarValue: 90 },
+  ]);
   const [mgDL, setMgDL] = useState(true);
   const [testType, settestType] = useState("");
   const [sugarValue, setSugarValue] = useState(0);
+  const [modalVisible, setModalVisible] = useState(false);
 
   //DATABASE
   const db = SQLite.openDatabase("med-logger2.db");
@@ -59,6 +64,7 @@ export default function BloodSugar({ route }) {
             (item) => item.testType == "Random"
           );
           setRandom(RandomSugar);
+          setPrevReadings(readings)
         },
         (txObj, error) => console.log(error)
       );
@@ -88,7 +94,7 @@ export default function BloodSugar({ route }) {
         "INSERT INTO blood_sugar (date, test_type, sugar_value, user_id) values (?, ?, ?, ?)",
         [date, testType, sugar, userID],
         (txObj, resultSet) => {
-          if(testType == "Fasting"){
+          if (testType == "Fasting") {
             let lastReading = [...fasting];
             lastReading.push({
               id: resultSet.insertId,
@@ -96,9 +102,9 @@ export default function BloodSugar({ route }) {
               sugarValue: sugarValue,
               date: date,
             });
-            setFasting(lastReading)
+            setFasting(lastReading);
           }
-          if(testType == "Postprandial"){
+          if (testType == "Postprandial") {
             let lastReading = [...postprandial];
             lastReading.push({
               id: resultSet.insertId,
@@ -106,9 +112,9 @@ export default function BloodSugar({ route }) {
               sugarValue: sugarValue,
               date: date,
             });
-            setPostprandial(lastReading)
+            setPostprandial(lastReading);
           }
-          if(testType == "Random"){
+          if (testType == "Random") {
             let lastReading = [...random];
             lastReading.push({
               id: resultSet.insertId,
@@ -116,7 +122,7 @@ export default function BloodSugar({ route }) {
               sugarValue: sugarValue,
               date: date,
             });
-            setRandom(lastReading)
+            setRandom(lastReading);
           }
           setSugarValue("");
         },
@@ -130,7 +136,10 @@ export default function BloodSugar({ route }) {
     labels: fasting.map((item) => item.date).slice(-7),
     datasets: [
       {
-        data: fasting.length >= 7 ? fasting.map((item) => item.sugarValue).slice(-7) : fasting.map((item) => item.sugarValue),
+        data:
+          fasting.length >= 7
+            ? fasting.map((item) => item.sugarValue).slice(-7)
+            : fasting.map((item) => item.sugarValue),
         color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
         strokeWidth: 2, // optional
       },
@@ -138,10 +147,13 @@ export default function BloodSugar({ route }) {
   };
 
   const pbsData = {
-    labels: postprandial.map((item)=> item.date).slice(-7),
+    labels: postprandial.map((item) => item.date).slice(-7),
     datasets: [
       {
-        data: postprandial.length >= 7 ? postprandial.map((item)=> item.sugarValue).slice(-7) : postprandial.map((item)=> item.sugarValue),
+        data:
+          postprandial.length >= 7
+            ? postprandial.map((item) => item.sugarValue).slice(-7)
+            : postprandial.map((item) => item.sugarValue),
         color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
         strokeWidth: 2, // optional
       },
@@ -152,7 +164,10 @@ export default function BloodSugar({ route }) {
     labels: random.map((item) => item.date).slice(-7),
     datasets: [
       {
-        data: random.length >= 7 ? random.map((item)=> item.sugarValue).slice(-7) : random.map((item)=> item.sugarValue),
+        data:
+          random.length >= 7
+            ? random.map((item) => item.sugarValue).slice(-7)
+            : random.map((item) => item.sugarValue),
         color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
         strokeWidth: 2, // optional
       },
@@ -193,7 +208,52 @@ export default function BloodSugar({ route }) {
               <Text style={styles.unit}>{!mgDL ? "(mmol/L)" : "(mg/dL)"}</Text>
             </View>
           </View>
-          <Button title="VIEW HISTORY" onPress={() => {}} color="#FFA500" />
+          <Button title="VIEW HISTORY" onPress={() => setModalVisible(true)} color="#FFA500" />
+
+          {/* Modal */}
+          <View style={{flex: 1}}>
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                setModalVisible(false);
+              }}
+            >
+              <ScrollView>
+                <View style={styles.centeredView}>
+                  <View style={styles.modalView}>
+                    <Text style={styles.modalText}>Your historical data</Text>
+                    <View style={styles.table}>
+                      <View style={{ display: "flex", flexDirection: "row" }}>
+                        <Text style={styles.tableHeader}>Date</Text>
+                        <Text style={styles.tableHeader}>Test Type</Text>
+                        <Text style={styles.tableHeader}>Sugar</Text>
+                      </View>
+                      {prevReadings.map((item, index) => {
+                        return (
+                          <View key={index} style={styles.tableRow}>
+                            <Text style={styles.tableCell}>{item.date}</Text>
+                            <Text style={styles.tableCell}>
+                              {item.testType}
+                            </Text>
+                            <Text style={styles.tableCell}>
+                              {item.sugarValue}
+                            </Text>
+                          </View>
+                        );
+                      })}
+                    </View>
+                    <Button
+                      onPress={() => setModalVisible(false)}
+                      title="Close"
+                      color={"orange"}
+                    />
+                  </View>
+                </View>
+              </ScrollView>
+            </Modal>
+          </View>
         </View>
         <View
           style={{
@@ -402,5 +462,44 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-evenly",
     margin: 10,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 5,
+    width: 350,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontSize: 20
+  },
+  table: {
+    width: 320,
+    marginVertical: 10
+  },
+  tableRow: {
+    flexDirection: "row",
+  },
+  tableHeader: {
+    flex:1, 
+    padding: 5, 
+    fontWeight: 'bold', 
+    textAlign: 'center',
+  },
+  tableCell: {
+    flex: 1,
+    padding: 3,    
+    textAlign: 'center'
   },
 });
