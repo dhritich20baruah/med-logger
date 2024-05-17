@@ -12,7 +12,6 @@ import Gallery from "./Gallery";
 
 const Diagnostics = ({ route }) => {
   const { userID } = route.params;
-  console.log(userID)
   const [showCamera, setShowCamera] = useState(false);
 
   const toggleCamera = () => {
@@ -30,15 +29,15 @@ const Diagnostics = ({ route }) => {
         }}
       >
         {showCamera ? (
-          <Text style={{ fontSize: 30, color: "white" }}>X</Text>
+          <FontAwesome name="circle-xmark" size={50} color="white" />
         ) : (
           <FontAwesome name="camera" size={50} color="white" />
         )}
       </TouchableOpacity>
       {showCamera ? (
-        <CameraFunction userId={userID}/>
+        <CameraFunction userId={userID} />
       ) : (
-        <Gallery userId={userID}/>
+        <Gallery userId={userID} />
       )}
     </View>
   );
