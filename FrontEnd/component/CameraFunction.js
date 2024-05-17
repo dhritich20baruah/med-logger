@@ -13,12 +13,36 @@ import { useEffect, useState, useRef } from "react";
 import { Camera } from "expo-camera";
 import { shareAsync } from "expo-sharing";
 import * as MediaLibrary from "expo-media-library";
+import * as SQLite from "expo-sqlite";
 
-export default function CameraFunction() {
+export default function CameraFunction({userId}) {
+  let user_Id = userId
   let cameraRef = useRef();
   const [hasCameraPermission, setHasCameraPermission] = useState();
   const [hasMediaLibPermit, setHasMediaLibPermit] = useState();
   const [photo, setPhoto] = useState();
+
+    //DATABASE
+    const db = SQLite.openDatabase("med-logger2.db");
+
+  useEffect(() => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS gallery (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, date TEXT, uri TEXT)"
+      );
+    });
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM gallery WHERE user_id = ?",
+        [userID],
+        (txObj, resultSet) => {
+      
+        },
+        (txObj, error) => console.log(error)
+      );
+    });
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -28,6 +52,8 @@ export default function CameraFunction() {
       setHasCameraPermission(cameraPermission.status === "granted");
       setHasMediaLibPermit(mediaLibraryPermission.status === "granted");
     })();
+
+    
   }, []);
 
   if (hasCameraPermission === undefined) {

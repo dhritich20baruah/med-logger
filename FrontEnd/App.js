@@ -56,9 +56,7 @@ function HomeScreen({ navigation, route }) {
       tx.executeSql(
         "SELECT * FROM user_info",
         null,
-        (txObj, resultSet) => {setUsers(resultSet.rows._array)
-        console.log(users)
-        },
+        (txObj, resultSet) => {setUsers(resultSet.rows._array)},
         (txObj, error) => console.log(error)
       );
     });
@@ -275,7 +273,6 @@ function HomeScreen({ navigation, route }) {
           )
         })}
        </View>
-       <Button onPress={()=>navigation.navigate("delete db")} title="delete db"/>
     </View>
     </ScrollView>
   );
@@ -303,20 +300,6 @@ export default function App() {
           component={HomeScreen}
           options={({ navigation, route }) => ({
             title: "Med Logger",
-            headerStyle: {
-              backgroundColor: "#800000",
-            },
-            headerTintColor: "#fff",
-            headerTitleStyle: {
-              fontWeight: "bold",
-            },
-          })}
-        />
-        <Stack.Screen
-          name="delete db"
-          component={DeleteDatabaseScreen}
-          options={({ navigation, route }) => ({
-            title: "deleted db",
             headerStyle: {
               backgroundColor: "#800000",
             },

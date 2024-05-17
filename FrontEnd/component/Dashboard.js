@@ -52,7 +52,7 @@ const Dashboard = ({ navigation, route }) => {
             <FontAwesome name="x-ray" size={50} color="#800000" />
             <Text style={styles.tileText}>Diagnostic Reports</Text>
             <TouchableOpacity
-              onPress={() => navigation.navigate("Diagnostic Reports")}
+              onPress={() => navigation.navigate("Diagnostic Reports", {userID})}
             >
               <Text style={styles.tileButton}>RECORD</Text>
             </TouchableOpacity>
