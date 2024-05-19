@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, Modal, Button } from "react";
 import {
   View,
   StyleSheet,
@@ -8,7 +8,6 @@ import {
 } from "react-native";
 import * as MediaLibrary from "expo-media-library";
 import * as SQLite from "expo-sqlite";
-import * as ImagePicker from "expo-image-picker";
 
 const Gallery = ({ userId }) => {
   let user_Id = userId;
@@ -16,6 +15,7 @@ const Gallery = ({ userId }) => {
     useState(null);
   const [photos, setPhotos] = useState([]);
   const [image, setImage] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
 
   //DATABASE
   const db = SQLite.openDatabase("med-logger2.db");
@@ -52,27 +52,18 @@ const Gallery = ({ userId }) => {
     );
   }
 
-  const handleImagePicker = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if(!result.canceled){
-        setImage(result.assets[0].uri)
-    }
+  const handleImage = async (uri) => {
+    setImage(uri)
+    setModalVisible(modalVisible => !modalVisible)
   };
 
   return (
     <View style={styles.container}>
-      {image && <Image source={{ uri: image }} style={{width: 350}} />}
       <FlatList
         data={photos}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={handleImagePicker}>
+          <TouchableOpacity onPress={()=>handleImage(item.uri)}>
             <Image source={{ uri: item.uri }} style={styles.photo} />
           </TouchableOpacity>
         )}
@@ -94,6 +85,22 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     margin: 1,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 5,
+    width: 350,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });
 
