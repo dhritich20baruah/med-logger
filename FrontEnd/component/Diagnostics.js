@@ -10,7 +10,7 @@ import CameraFunction from "./CameraFunction";
 import FontAwesome from "@expo/vector-icons/FontAwesome6";
 import Gallery from "./Gallery";
 
-const Diagnostics = ({ route }) => {
+const Diagnostics = ({navigation, route }) => {
   const { userID } = route.params;
   const [showCamera, setShowCamera] = useState(false);
 
@@ -37,7 +37,7 @@ const Diagnostics = ({ route }) => {
       {showCamera ? (
         <CameraFunction userId={userID} />
       ) : (
-        <Gallery userId={userID} />
+        <Gallery userId={userID} navigation={navigation}/>
       )}
     </View>
   );

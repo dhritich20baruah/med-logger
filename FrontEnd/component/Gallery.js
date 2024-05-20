@@ -5,17 +5,17 @@ import {
   FlatList,
   Image,
   TouchableOpacity,
+  Text,
 } from "react-native";
 import * as MediaLibrary from "expo-media-library";
 import * as SQLite from "expo-sqlite";
 
-const Gallery = ({ userId }) => {
+const Gallery = ({ navigation, userId }) => {
   let user_Id = userId;
   const [hasMediaLibraryPermission, setHasMediaLibraryPermission] =
     useState(null);
   const [photos, setPhotos] = useState([]);
   const [image, setImage] = useState("");
-  const [modalVisible, setModalVisible] = useState(false);
 
   //DATABASE
   const db = SQLite.openDatabase("med-logger2.db");
@@ -53,8 +53,8 @@ const Gallery = ({ userId }) => {
   }
 
   const handleImage = async (uri) => {
-    setImage(uri)
-    setModalVisible(modalVisible => !modalVisible)
+    setImage(uri);
+    navigation.navigate("Display", { image });
   };
 
   return (
@@ -63,7 +63,9 @@ const Gallery = ({ userId }) => {
         data={photos}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={()=>handleImage(item.uri)}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Image", {uri: item.uri})}
+          >
             <Image source={{ uri: item.uri }} style={styles.photo} />
           </TouchableOpacity>
         )}

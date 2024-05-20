@@ -1,10 +1,8 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import {
-  StyleSheet,
   Text,
   View,
-  Button,
   TextInput,
   TouchableOpacity,
   Alert,
@@ -20,7 +18,7 @@ import Diagnostic from "./component/Diagnostics";
 import Pills from "./component/Pills";
 import Doctors from "./component/Doctors";
 import History from "./component/History";
-import DeleteDatabaseScreen from "./component/DataBase";
+import Display from "./component/Display";
 
 function HomeScreen({ navigation, route }) {
   const [name, setName] = useState("");
@@ -339,6 +337,15 @@ export default function App() {
         <Stack.Screen
           name="Diagnostic Reports"
           component={Diagnostic}
+          options={() => ({
+            headerStyle: {
+              backgroundColor: "#800000",
+            },
+          })}
+        />
+        <Stack.Screen
+          name="Image"
+          component={Display}
           options={() => ({
             headerStyle: {
               backgroundColor: "#800000",
