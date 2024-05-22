@@ -64,7 +64,7 @@ const Gallery = ({ navigation, userId }) => {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => navigation.navigate("Image", {uri: item.uri})}
+            onPress={() => navigation.navigate("Image", {uri: item.uri, imageId: item.id})}
           >
             <Image source={{ uri: item.uri }} style={styles.photo} />
           </TouchableOpacity>
@@ -84,8 +84,8 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
   },
   photo: {
-    width: 100,
-    height: 100,
+    width: 115,
+    height: 115,
     margin: 1,
   },
   modalView: {

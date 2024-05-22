@@ -14,7 +14,8 @@ import { shareAsync } from "expo-sharing";
 import { useNavigation } from '@react-navigation/native';
 
 export default function Display({ route }) {
-  const { uri } = route.params;
+  const { uri, imageId } = route.params;
+  console.log(imageId)
   const [permission, setPermission] = useState(null);
 
   const navigation = useNavigation();
@@ -52,8 +53,19 @@ export default function Display({ route }) {
 
       const assetId = assets.assets[0].id;
 
-      //    await MediaLibrary.deleteAssetsAsync([assetId])
-      console.log(assetId);
+      await MediaLibrary.deleteAssetsAsync([assetId])
+      await db.transaction((tx) => {
+        tx.executeSql(
+          "DELETE FROM gallery WHERE id = ?",
+          [imageId],
+          (txObj, resultSet) => {
+            if (resultSet.rowsAffected > 0) {
+            console.log("Image deleted")
+            }
+          },
+          (txObj, error) => console.log(error)
+        );
+      });
       Alert.alert("Image Deleted");
       navigation.goBack()
     } catch (error) {
@@ -61,15 +73,19 @@ export default function Display({ route }) {
       Alert.alert("Error", "Failed to delete image");
     }
   };
+
+  const handleShare = () => {
+    shareAsync(uri)
+  }
   return (
     <View style={styles.container}>
       <Image source={{ uri }} style={styles.image} />
       <View style={{ display: "flex", flexDirection: "row" }}>
-        <TouchableOpacity style={{ backgroundColor: "#800000", margin: 20, padding: 10 }} onPress={handleDelete}>
-        <FontAwesome name="trash-can" size={30} color="white" />
+        <TouchableOpacity style={{ margin: 20, padding: 10, elevation: 18 }} onPress={handleDelete}>
+        <FontAwesome name="trash-can" size={30} color="#800000" />
         </TouchableOpacity>
-        <TouchableOpacity style={{ backgroundColor: "#800000", margin: 20, padding: 10 }}>
-        <FontAwesome name="share-nodes" size={30} color="white" />
+        <TouchableOpacity style={{ margin: 20, padding: 10, elevation: 18 }} onPress={handleShare}>
+        <FontAwesome name="share-nodes" size={30} color="#800000" />
         </TouchableOpacity>
       </View>
     </View>
