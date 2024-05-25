@@ -123,7 +123,7 @@ export default function CameraFunction({ userId }) {
     <View style={styles.container}>
       <Text style={styles.title}>Camera Function</Text>
       <Camera style={styles.camera} ref={cameraRef}></Camera>
-      <Button title="Snap Picture" onPress={takePic} />
+      <Button title="Snap Picture" onPress={takePic} color="#800000"/>
       <StatusBar style="auto" />
     </View>
   );

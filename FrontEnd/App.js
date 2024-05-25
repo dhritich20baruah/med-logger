@@ -6,7 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  ScrollView
+  ScrollView,
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -19,6 +19,7 @@ import Pills from "./component/Pills";
 import Doctors from "./component/Doctors";
 import History from "./component/History";
 import Display from "./component/Display";
+import CalendarScreen from "./component/CalendarScreen";
 
 function HomeScreen({ navigation, route }) {
   const [name, setName] = useState("");
@@ -29,7 +30,7 @@ function HomeScreen({ navigation, route }) {
   const [inch, setInch] = useState("");
   const [heightUnit, setHeightUnit] = useState(false);
   const [weightUnit, setWeightUnit] = useState(false);
-  const [users, setUsers] = useState([])
+  const [users, setUsers] = useState([]);
 
   const toggleWeightUnit = () => {
     setWeightUnit((prevState) => !prevState);
@@ -54,7 +55,9 @@ function HomeScreen({ navigation, route }) {
       tx.executeSql(
         "SELECT * FROM user_info",
         null,
-        (txObj, resultSet) => {setUsers(resultSet.rows._array)},
+        (txObj, resultSet) => {
+          setUsers(resultSet.rows._array);
+        },
         (txObj, error) => console.log(error)
       );
     });
@@ -115,7 +118,7 @@ function HomeScreen({ navigation, route }) {
           setHeight("");
           setFeet("");
           setInch("");
-          setWeight("")
+          setWeight("");
         },
         (txObj, error) => console.log(error)
       );
@@ -124,154 +127,181 @@ function HomeScreen({ navigation, route }) {
 
   return (
     <ScrollView>
-    <View style={{ flex: 1, padding: 20 }}>
-      <Text style={{textAlign: "center", color: "#800000", fontSize: 20}}>ADD NEW USER</Text>
-      <TextInput
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-        style={{
-          marginBottom: 10,
-          padding: 10,
-          borderWidth: 1,
-          borderColor: "#800000",
-        }}
-      />
-      <TextInput
-        placeholder="Age"
-        value={age}
-        onChangeText={setAge}
-        keyboardType="numeric"
-        style={{
-          marginBottom: 10,
-          padding: 10,
-          borderWidth: 1,
-          borderColor: "#800000",
-        }}
-      />
-      <Text style={{ marginBottom: 5 }}>
-        Weight ({weightUnit ? "lb" : "kg"})
-      </Text>
-      <TextInput
-        placeholder={`Weight (${weightUnit ? "lb." : "kg."})`}
-        value={weight}
-        onChangeText={setWeight}
-        keyboardType="numeric"
-        style={{
-          marginBottom: 10,
-          padding: 10,
-          borderWidth: 1,
-          borderColor: "#800000",
-        }}
-      />
-      <View style={{ flexDirection: "row", marginBottom: 10 }}>
-        <TouchableOpacity
-          onPress={toggleWeightUnit}
-          style={{
-            marginRight: 10,
-            padding: 10,
-            backgroundColor: weightUnit ? "lightgray" : "orange",
-            borderRadius: 5,
-          }}
-        >
-          <Text style={{ color: weightUnit ? "black" : "white" }}>Kg</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={toggleWeightUnit}
-          style={{
-            padding: 10,
-            backgroundColor: weightUnit ? "orange" : "lightgray",
-            borderRadius: 5,
-          }}
-        >
-          <Text style={{ color: weightUnit ? "white" : "black" }}>lb.</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={{ marginBottom: 10 }}>
-        <Text style={{ marginBottom: 5 }}>
-          Height ({heightUnit ? "ft-in" : "cm"})
+      <View style={{ flex: 1, padding: 20 }}>
+        <Text style={{ textAlign: "center", color: "#800000", fontSize: 20 }}>
+          ADD NEW USER
         </Text>
-        {heightUnit ? (
-          <View style={{ flexDirection: "row" }}>
-            <TextInput
-              placeholder="Feet"
-              value={feet}
-              onChangeText={setFeet}
-              keyboardType="numeric"
-              style={{
-                marginRight: 10,
-                flex: 1,
-                padding: 10,
-                borderWidth: 1,
-                borderColor: "#800000",
-              }}
-            />
-            <TextInput
-              placeholder="Inches"
-              value={inch}
-              onChangeText={setInch}
-              keyboardType="numeric"
-              style={{
-                flex: 1,
-                padding: 10,
-                borderWidth: 1,
-                borderColor: "#800000",
-              }}
-            />
-          </View>
-        ) : (
-          <TextInput
-            placeholder="Height(cm)"
-            value={height}
-            onChangeText={setHeight}
-            keyboardType="numeric"
-            style={{ padding: 10, borderWidth: 1, borderColor: "#800000" }}
-          />
-        )}
-      </View>
-      <View style={{ flexDirection: "row", marginBottom: 10 }}>
-        <TouchableOpacity
-          onPress={toggleHeightUnit}
+        <TextInput
+          placeholder="Name"
+          value={name}
+          onChangeText={setName}
           style={{
-            marginRight: 10,
+            marginBottom: 10,
             padding: 10,
-            backgroundColor: heightUnit ? "lightgray" : "orange",
-            borderRadius: 5,
+            borderWidth: 1,
+            borderColor: "#800000",
           }}
-        >
-          <Text style={{ color: heightUnit ? "black" : "white" }}>cm</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={toggleHeightUnit}
+        />
+        <TextInput
+          placeholder="Age"
+          value={age}
+          onChangeText={setAge}
+          keyboardType="numeric"
           style={{
+            marginBottom: 10,
             padding: 10,
-            backgroundColor: heightUnit ? "orange" : "lightgray",
-            borderRadius: 5,
+            borderWidth: 1,
+            borderColor: "#800000",
           }}
-        >
-          <Text style={{ color: heightUnit ? "white" : "black" }}>ft-in</Text>
-        </TouchableOpacity>
-      </View>
-      <TouchableOpacity
-        onPress={handleSubmit}
-        style={{ backgroundColor: "orange", padding: 10, borderRadius: 5 }}
-      >
-        <Text style={{ color: "white", textAlign: "center" }}>Submit</Text>
-      </TouchableOpacity>
-  
-       <Text style={{textAlign: "center", color: "#800000", fontSize: 20, margin: 10}}>OR CONTINUE AS</Text>
-       <View>
-        {users.map((item)=>{
-          return(
-            <View key={item.id}>
-                <TouchableOpacity onPress={() => navigation.navigate("Dashboard", {userID: item.id})}>
-                  <Text style={{color: "white", margin: 5, padding: 5, textAlign: "center", backgroundColor: "#800000", fontSize: 20, elevation: 5}}>{item.name}</Text>
-                </TouchableOpacity>
+        />
+        <Text style={{ marginBottom: 5 }}>
+          Weight ({weightUnit ? "lb" : "kg"})
+        </Text>
+        <TextInput
+          placeholder={`Weight (${weightUnit ? "lb." : "kg."})`}
+          value={weight}
+          onChangeText={setWeight}
+          keyboardType="numeric"
+          style={{
+            marginBottom: 10,
+            padding: 10,
+            borderWidth: 1,
+            borderColor: "#800000",
+          }}
+        />
+        <View style={{ flexDirection: "row", marginBottom: 10 }}>
+          <TouchableOpacity
+            onPress={toggleWeightUnit}
+            style={{
+              marginRight: 10,
+              padding: 10,
+              backgroundColor: weightUnit ? "lightgray" : "orange",
+              borderRadius: 5,
+            }}
+          >
+            <Text style={{ color: weightUnit ? "black" : "white" }}>Kg</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={toggleWeightUnit}
+            style={{
+              padding: 10,
+              backgroundColor: weightUnit ? "orange" : "lightgray",
+              borderRadius: 5,
+            }}
+          >
+            <Text style={{ color: weightUnit ? "white" : "black" }}>lb.</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ marginBottom: 10 }}>
+          <Text style={{ marginBottom: 5 }}>
+            Height ({heightUnit ? "ft-in" : "cm"})
+          </Text>
+          {heightUnit ? (
+            <View style={{ flexDirection: "row" }}>
+              <TextInput
+                placeholder="Feet"
+                value={feet}
+                onChangeText={setFeet}
+                keyboardType="numeric"
+                style={{
+                  marginRight: 10,
+                  flex: 1,
+                  padding: 10,
+                  borderWidth: 1,
+                  borderColor: "#800000",
+                }}
+              />
+              <TextInput
+                placeholder="Inches"
+                value={inch}
+                onChangeText={setInch}
+                keyboardType="numeric"
+                style={{
+                  flex: 1,
+                  padding: 10,
+                  borderWidth: 1,
+                  borderColor: "#800000",
+                }}
+              />
             </View>
-          )
-        })}
-       </View>
-    </View>
+          ) : (
+            <TextInput
+              placeholder="Height(cm)"
+              value={height}
+              onChangeText={setHeight}
+              keyboardType="numeric"
+              style={{ padding: 10, borderWidth: 1, borderColor: "#800000" }}
+            />
+          )}
+        </View>
+        <View style={{ flexDirection: "row", marginBottom: 10 }}>
+          <TouchableOpacity
+            onPress={toggleHeightUnit}
+            style={{
+              marginRight: 10,
+              padding: 10,
+              backgroundColor: heightUnit ? "lightgray" : "orange",
+              borderRadius: 5,
+            }}
+          >
+            <Text style={{ color: heightUnit ? "black" : "white" }}>cm</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={toggleHeightUnit}
+            style={{
+              padding: 10,
+              backgroundColor: heightUnit ? "orange" : "lightgray",
+              borderRadius: 5,
+            }}
+          >
+            <Text style={{ color: heightUnit ? "white" : "black" }}>ft-in</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity
+          onPress={handleSubmit}
+          style={{ backgroundColor: "orange", padding: 10, borderRadius: 5 }}
+        >
+          <Text style={{ color: "white", textAlign: "center" }}>Submit</Text>
+        </TouchableOpacity>
+
+        <Text
+          style={{
+            textAlign: "center",
+            color: "#800000",
+            fontSize: 20,
+            margin: 10,
+          }}
+        >
+          OR CONTINUE AS
+        </Text>
+        <View>
+          {users.map((item) => {
+            return (
+              <View key={item.id}>
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate("Dashboard", { userID: item.id })
+                  }
+                >
+                  <Text
+                    style={{
+                      color: "white",
+                      margin: 5,
+                      padding: 5,
+                      textAlign: "center",
+                      backgroundColor: "#800000",
+                      fontSize: 20,
+                      elevation: 5,
+                    }}
+                  >
+                    {item.name}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            );
+          })}
+        </View>
+      </View>
     </ScrollView>
   );
 }
@@ -361,7 +391,16 @@ export default function App() {
             },
           })}
         />
-          <Stack.Screen
+        <Stack.Screen
+          name="Calendar"
+          component={CalendarScreen}
+          options={() => ({
+            headerStyle: {
+              backgroundColor: "#800000",
+            },
+          })}
+        />
+        <Stack.Screen
           name="Your Doctors"
           component={Doctors}
           options={() => ({
@@ -370,7 +409,7 @@ export default function App() {
             },
           })}
         />
-          <Stack.Screen
+        <Stack.Screen
           name="History"
           component={History}
           options={() => ({

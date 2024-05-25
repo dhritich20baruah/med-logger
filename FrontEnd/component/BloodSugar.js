@@ -52,19 +52,24 @@ export default function BloodSugar({ route }) {
             sugarValue: item.sugar_value,
           }));
           // Update the state with the fetched readings
-          const fastingSugar = readings.filter(
-            (item) => item.testType == "Fasting"
-          );
-          setFasting(fastingSugar);
-          const ppSugar = readings.filter(
-            (item) => item.testType == "Postprandial"
-          );
-          setPostprandial(ppSugar);
-          const RandomSugar = readings.filter(
-            (item) => item.testType == "Random"
-          );
-          setRandom(RandomSugar);
-          setPrevReadings(readings)
+          if(readings.length !== 0){
+            const fastingSugar = readings.filter(
+              (item) => item.testType == "Fasting"
+            );
+            setFasting(fastingSugar);
+  
+            const ppSugar = readings.filter(
+              (item) => item.testType == "Postprandial"
+            );
+            setPostprandial(ppSugar);
+  
+            const RandomSugar = readings.filter(
+              (item) => item.testType == "Random"
+            );
+            setRandom(RandomSugar);
+            
+            setPrevReadings(readings)
+          }        
         },
         (txObj, error) => console.log(error)
       );
