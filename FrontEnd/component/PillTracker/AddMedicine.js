@@ -10,14 +10,21 @@ import {
   ScrollView,
   StyleSheet,
   Pressable,
+  Button,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import ScrollPicker from "react-native-wheel-scrollview-picker";
 
 export default function AddMedicine() {
   const [timing, setTiming] = useState("");
   const [date, setDate] = useState(new Date());
   const [showDate, setShowDate] = useState(false);
   const [startDate, setStartDate] = useState("");
+  const [selectedValue, setSelectedValue] = useState("January");
+  const daysWeeksMonths = ["Days", "Weeks", "Months"];
+
+  const NumsArray = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+
   const handleTiming = (option) => {
     setTiming(option);
   };
@@ -26,24 +33,22 @@ export default function AddMedicine() {
     setShowDate(!showDate);
   };
 
-  const onChange = ({ type }, selectedDate) => {
-    if (type == "set") {
-      const currentDate = selectedDate;
-      setDate(currentDate);
-      if (Platform.OS === "android") {
-        toggleShowDate();
-        setStartDate(currentDate.toDateString());
-      }
-    } else {
-      toggleShowDate();
-    }
+  const onChange = (e, selectedDate) => {
+    setDate(selectedDate);
+    toggleShowDate();
   };
+
   return (
     <ScrollView>
       <View style={styles.container}>
         <View>
-          <Text style={styles.textStyle}>Set Start date</Text>
-          {!showDate && (
+          <Text style={styles.textStyle}>
+            When will you start taking the medicine?
+          </Text>
+          <TouchableOpacity onPress={toggleShowDate}>
+            <Text style={styles.textStyleSecondary}>{date.toDateString()}</Text>
+          </TouchableOpacity>
+          {showDate && (
             <DateTimePicker
               value={date}
               mode={"date"}
@@ -52,99 +57,138 @@ export default function AddMedicine() {
               onChange={onChange}
             />
           )}
-
-            <Pressable onPress={toggleShowDate} style={{backgroundColor: "red"}}>
-              <TextInput
-                onChangeText={setDate}
-                value={setStartDate}
-                // editable={false}
-              />
-            </Pressable>
-        
         </View>
-        <Text>How long will you be taking this medicine?</Text>
+
+        <View>
+          <Text style={styles.textStyle}>
+            How long will you be taking this medicine?
+          </Text>
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-evenly",
+            }}
+          >
+            <ScrollPicker
+              dataSource={NumsArray}
+              selectedIndex={1}
+              onValueChange={(data, selectedIndex) => {
+                //
+              }}
+              wrapperHeight={180}
+              wrapperBackground="#FFFFFF"
+              itemHeight={60}
+              highlightColor="#d8d8d8"
+              highlightBorderWidth={3}
+              style={{ width: 100 }}
+            />
+            <ScrollPicker
+              dataSource={daysWeeksMonths}
+              selectedIndex={1}
+              onValueChange={(data, selectedIndex) => {
+                //
+              }}
+              wrapperHeight={180}
+              wrapperBackground="#FFFFFF"
+              itemHeight={60}
+              highlightColor="#d8d8d8"
+              highlightBorderWidth={3}
+              style={{ width: 100 }}
+            />
+          </View>
+        </View>
         <Text>Type of medicine</Text>
         <Text>Set doses</Text>
-        <Text>Dose Timing</Text>
+        <Text style={styles.textStyle}>At what time should you be taking the medicines?</Text>
         <View>
-          <TouchableOpacity
-            style={[
-              styles.radioButton,
-              timing === "Fasting" && styles.selectedButton,
-            ]}
-          >
-            <Text
-              style={styles.radioText}
-              onPress={() => handleTiming("BeforeBreakfast")}
+          {/* Breakfast */}
+          <View style={styles.radioBtnContainer}>
+            <TouchableOpacity
+              style={[
+                styles.radioButton,
+                timing === "Fasting" && styles.selectedButton,
+              ]}
             >
-              Before Breakfast
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.radioButton,
-              timing === "Fasting" && styles.selectedButton,
-            ]}
-          >
-            <Text
-              style={styles.radioText}
-              onPress={() => handleTiming("AfterBreakfast")}
+              <Text
+                style={styles.radioText}
+                onPress={() => handleTiming("BeforeBreakfast")}
+              >
+                Before Breakfast
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.radioButton,
+                timing === "Fasting" && styles.selectedButton,
+              ]}
             >
-              After Breakfast
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.radioButton,
-              timing === "Fasting" && styles.selectedButton,
-            ]}
-          >
-            <Text
-              style={styles.radioText}
-              onPress={() => handleTiming("BeforeLunch")}
+              <Text
+                style={styles.radioText}
+                onPress={() => handleTiming("AfterBreakfast")}
+              >
+                After Breakfast
+              </Text>
+            </TouchableOpacity>
+          </View>
+          {/* Lunch */}
+          <View style={styles.radioBtnContainer}>
+            <TouchableOpacity
+              style={[
+                styles.radioButton,
+                timing === "Fasting" && styles.selectedButton,
+              ]}
             >
-              Before Lunch
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.radioButton,
-              timing === "Fasting" && styles.selectedButton,
-            ]}
-          >
-            <Text
-              style={styles.radioText}
-              onPress={() => handleTiming("AfterLunch")}
+              <Text
+                style={styles.radioText}
+                onPress={() => handleTiming("BeforeLunch")}
+              >
+                Before Lunch
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.radioButton,
+                timing === "Fasting" && styles.selectedButton,
+              ]}
             >
-              After Lunch
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.radioButton,
-              timing === "Fasting" && styles.selectedButton,
-            ]}
-          >
-            <Text
-              style={styles.radioText}
-              onPress={() => handleTiming("BeforeDinner")}
+              <Text
+                style={styles.radioText}
+                onPress={() => handleTiming("AfterLunch")}
+              >
+                After Lunch
+              </Text>
+            </TouchableOpacity>
+          </View>
+          {/* Dinner */}
+          <View style={styles.radioBtnContainer}>
+            <TouchableOpacity
+              style={[
+                styles.radioButton,
+                timing === "Fasting" && styles.selectedButton,
+              ]}
             >
-              Before Dinner
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.radioButton,
-              timing === "Fasting" && styles.selectedButton,
-            ]}
-          >
-            <Text
-              style={styles.radioText}
-              onPress={() => handleTiming("AfterDinner")}
+              <Text
+                style={styles.radioText}
+                onPress={() => handleTiming("BeforeDinner")}
+              >
+                Before Dinner
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.radioButton,
+                timing === "Fasting" && styles.selectedButton,
+              ]}
             >
-              After Dinner
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={styles.radioText}
+                onPress={() => handleTiming("AfterDinner")}
+              >
+                After Dinner
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </ScrollView>
@@ -153,15 +197,26 @@ export default function AddMedicine() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
   },
   textStyle: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: "500",
     color: "#800000",
+    margin: 10,
+    textAlign: 'center'
+  },
+  textStyleSecondary: {
+    textAlign: "center",
+    margin: 5,
+    fontSize: 20,
+    fontFamily: "sans-serif",
+  },
+  radioBtnContainer: {
+    display: 'flex',
+    flexDirection: 'row'
   },
   radioButton: {
     backgroundColor: "#f0f0f0",
@@ -171,6 +226,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     color: "#80000",
+    width: 170,
   },
   selectedButton: {
     backgroundColor: "orange",
@@ -178,6 +234,7 @@ const styles = StyleSheet.create({
   },
   radioText: {
     fontSize: 16,
-    color: "#000",
+    color: "#800000",
+    textAlign: "center"
   },
 });
