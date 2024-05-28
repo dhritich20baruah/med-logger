@@ -16,17 +16,44 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import ScrollPicker from "react-native-wheel-scrollview-picker";
 
 export default function AddMedicine() {
-  const [timing, setTiming] = useState("");
   const [date, setDate] = useState(new Date());
   const [showDate, setShowDate] = useState(false);
+  const [timing, setTiming] = useState({
+    BeforeBreakfast: false,
+    AfterBreakfast: false,
+    BeforeLunch: false,
+    AfterLunch: false,
+    BeforeDinner: false,
+    AfterDinner: false,
+  });
+  const [days, setDays] = useState({
+    sunday: false,
+    monday: false,
+    tuesday: false,
+    wednesday: false,
+    thursday: false,
+    friday: false,
+    saturday: false,
+  });
   const [startDate, setStartDate] = useState("");
   const [selectedValue, setSelectedValue] = useState("January");
+
   const daysWeeksMonths = ["Days", "Weeks", "Months"];
 
   const NumsArray = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
 
-  const handleTiming = (option) => {
-    setTiming(option);
+  const handleDays = (key) => {
+    setDays((prevSelections) => ({
+      ...prevSelections,
+      [key]: !prevSelections[key],
+    }));
+  };
+
+  const handleTiming = (key) => {
+    setTiming((prevSelections) => ({
+      ...prevSelections,
+      [key]: !prevSelections[key],
+    }));
   };
 
   const toggleShowDate = () => {
@@ -41,6 +68,8 @@ export default function AddMedicine() {
   return (
     <ScrollView>
       <View style={styles.container}>
+        {/* MEDICINE NAME */}
+        {/* START DATE */}
         <View>
           <Text style={styles.textStyle}>
             When will you start taking the medicine?
@@ -58,7 +87,7 @@ export default function AddMedicine() {
             />
           )}
         </View>
-
+        {/* DURATION OF MEDICATION */}
         <View>
           <Text style={styles.textStyle}>
             How long will you be taking this medicine?
@@ -98,37 +127,99 @@ export default function AddMedicine() {
             />
           </View>
         </View>
-        <Text>Type of medicine</Text>
-        <Text>Set doses</Text>
-        <Text style={styles.textStyle}>At what time should you be taking the medicines?</Text>
+
+        {/* MEDICATION SCHEDULE */}
+        <Text style={styles.textStyle}>How often do you need to take it?</Text>
+        <View style={styles.radioBtnContainer}>
+          <TouchableOpacity
+            style={[
+              styles.radioDayBtn,
+              days.sunday && styles.selectedDayBtn,
+            ]}
+            onPress={() => handleDays("sunday")}
+          >
+            <Text style={styles.radioText}>S</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.radioDayBtn,
+              days.moday && styles.selectedDayBtn,
+            ]}
+            onPress={() => handleDays("moday")}
+          >
+            <Text style={styles.radioText}>M</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.radioDayBtn,
+              days.tuesday && styles.selectedDayBtn,
+            ]}
+            onPress={() => handleDays("tuesday")}
+          >
+            <Text style={styles.radioText}>T</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.radioDayBtn,
+              days.wednesday && styles.selectedDayBtn,
+            ]}
+            onPress={() => handleDays("wednesday")}
+          >
+            <Text style={styles.radioText}>W</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.radioDayBtn,
+              days.thursday && styles.selectedDayBtn,
+            ]}
+            onPress={() => handleDays("thursday")}
+          >
+            <Text style={styles.radioText}>T</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.radioDayBtn,
+              days.friday && styles.selectedDayBtn,
+            ]}
+            onPress={() => handleDays("friday")}
+          >
+            <Text style={styles.radioText}>F</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.radioDayBtn,
+              days.saturday && styles.selectedDayBtn,
+            ]}
+            onPress={() => handleDays("saturday")}
+          >
+            <Text style={styles.radioText}>S</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* MEDICATION TIMINGS */}
+        <Text style={styles.textStyle}>
+          At what time should you be taking the medicines?
+        </Text>
         <View>
           {/* Breakfast */}
           <View style={styles.radioBtnContainer}>
             <TouchableOpacity
               style={[
                 styles.radioButton,
-                timing === "Fasting" && styles.selectedButton,
+                timing.BeforeBreakfast && styles.selectedButton,
               ]}
+              onPress={() => handleTiming("BeforeBreakfast")}
             >
-              <Text
-                style={styles.radioText}
-                onPress={() => handleTiming("BeforeBreakfast")}
-              >
-                Before Breakfast
-              </Text>
+              <Text style={styles.radioText}>Before Breakfast</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.radioButton,
-                timing === "Fasting" && styles.selectedButton,
+                timing.AfterBreakfast && styles.selectedButton,
               ]}
+              onPress={() => handleTiming("AfterBreakfast")}
             >
-              <Text
-                style={styles.radioText}
-                onPress={() => handleTiming("AfterBreakfast")}
-              >
-                After Breakfast
-              </Text>
+              <Text style={styles.radioText}>After Breakfast</Text>
             </TouchableOpacity>
           </View>
           {/* Lunch */}
@@ -136,28 +227,20 @@ export default function AddMedicine() {
             <TouchableOpacity
               style={[
                 styles.radioButton,
-                timing === "Fasting" && styles.selectedButton,
+                timing.BeforeLunch && styles.selectedButton,
               ]}
+              onPress={() => handleTiming("BeforeLunch")}
             >
-              <Text
-                style={styles.radioText}
-                onPress={() => handleTiming("BeforeLunch")}
-              >
-                Before Lunch
-              </Text>
+              <Text style={styles.radioText}>Before Lunch</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.radioButton,
-                timing === "Fasting" && styles.selectedButton,
+                timing.AfterLunch && styles.selectedButton,
               ]}
+              onPress={() => handleTiming("AfterLunch")}
             >
-              <Text
-                style={styles.radioText}
-                onPress={() => handleTiming("AfterLunch")}
-              >
-                After Lunch
-              </Text>
+              <Text style={styles.radioText}>After Lunch</Text>
             </TouchableOpacity>
           </View>
           {/* Dinner */}
@@ -165,28 +248,20 @@ export default function AddMedicine() {
             <TouchableOpacity
               style={[
                 styles.radioButton,
-                timing === "Fasting" && styles.selectedButton,
+                timing.BeforeDinner && styles.selectedButton,
               ]}
+              onPress={() => handleTiming("BeforeDinner")}
             >
-              <Text
-                style={styles.radioText}
-                onPress={() => handleTiming("BeforeDinner")}
-              >
-                Before Dinner
-              </Text>
+              <Text style={styles.radioText}>Before Dinner</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.radioButton,
-                timing === "Fasting" && styles.selectedButton,
+                timing.AfterDinner && styles.selectedButton,
               ]}
+              onPress={() => handleTiming("AfterDinner")}
             >
-              <Text
-                style={styles.radioText}
-                onPress={() => handleTiming("AfterDinner")}
-              >
-                After Dinner
-              </Text>
+              <Text style={styles.radioText}>After Dinner</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -206,7 +281,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#800000",
     margin: 10,
-    textAlign: 'center'
+    textAlign: "center",
   },
   textStyleSecondary: {
     textAlign: "center",
@@ -215,26 +290,40 @@ const styles = StyleSheet.create({
     fontFamily: "sans-serif",
   },
   radioBtnContainer: {
-    display: 'flex',
-    flexDirection: 'row'
+    display: "flex",
+    flexDirection: "row",
   },
   radioButton: {
     backgroundColor: "#f0f0f0",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
-    borderWidth: 1,
-    borderColor: "#ccc",
     color: "#80000",
     width: 170,
+    margin: 3,
+    elevation: 10
   },
   selectedButton: {
+    backgroundColor: "orange",
+    color: "white",
+  },
+  radioDayBtn: {
+    backgroundColor: "#f0f0f0",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 50,
+    color: "#80000", 
+    margin: 3,
+    elevation: 10,
+    height: 45,
+  },
+  selectedDayBtn: {
     backgroundColor: "orange",
     color: "white",
   },
   radioText: {
     fontSize: 16,
     color: "#800000",
-    textAlign: "center"
+    textAlign: "center",
   },
 });
