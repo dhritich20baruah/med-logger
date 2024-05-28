@@ -16,6 +16,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import ScrollPicker from "react-native-wheel-scrollview-picker";
 
 export default function AddMedicine() {
+  const [medicineName, setMedicineName] = useState("")
   const [date, setDate] = useState(new Date());
   const [showDate, setShowDate] = useState(false);
   const [timing, setTiming] = useState({
@@ -35,7 +36,7 @@ export default function AddMedicine() {
     friday: false,
     saturday: false,
   });
-  const [startDate, setStartDate] = useState("");
+  const [allSelected, setAllSelected] = useState(false);
   const [selectedValue, setSelectedValue] = useState("January");
 
   const daysWeeksMonths = ["Days", "Weeks", "Months"];
@@ -47,6 +48,15 @@ export default function AddMedicine() {
       ...prevSelections,
       [key]: !prevSelections[key],
     }));
+  };
+
+  const handleSelectEveryday = () => {
+    const newSelections = Object.keys(days).reduce((acc, key) => {
+      acc[key] = !allSelected;
+      return acc;
+    }, {});
+    setDays(newSelections);
+    setAllSelected(!allSelected);
   };
 
   const handleTiming = (key) => {
@@ -69,6 +79,18 @@ export default function AddMedicine() {
     <ScrollView>
       <View style={styles.container}>
         {/* MEDICINE NAME */}
+        <Text style={styles.textStyle}>
+          Medication Name:
+        </Text>
+        <View>
+        <TextInput
+          onChangeText={setMedicineName}
+          value={medicineName}
+          placeholder="Name of the medicine"
+          style={styles.inputField}
+        />
+        </View>
+
         {/* START DATE */}
         <View>
           <Text style={styles.textStyle}>
@@ -87,6 +109,7 @@ export default function AddMedicine() {
             />
           )}
         </View>
+
         {/* DURATION OF MEDICATION */}
         <View>
           <Text style={styles.textStyle}>
@@ -130,6 +153,18 @@ export default function AddMedicine() {
 
         {/* MEDICATION SCHEDULE */}
         <Text style={styles.textStyle}>How often do you need to take it?</Text>
+        <View style={styles.radioAllBtnContainer}>
+        <TouchableOpacity
+            style={[allSelected ?
+              styles.radioAllBtnSelected :
+              styles.radioAllBtn
+            ]}
+            onPress={handleSelectEveryday}
+          >
+          </TouchableOpacity>
+          <Text style={styles.radioAllBtnText}>Every Day</Text>
+        </View>
+        <Text style={styles.radioText}>Or on certain days.</Text>
         <View style={styles.radioBtnContainer}>
           <TouchableOpacity
             style={[
@@ -143,9 +178,9 @@ export default function AddMedicine() {
           <TouchableOpacity
             style={[
               styles.radioDayBtn,
-              days.moday && styles.selectedDayBtn,
+              days.monday && styles.selectedDayBtn,
             ]}
-            onPress={() => handleDays("moday")}
+            onPress={() => handleDays("monday")}
           >
             <Text style={styles.radioText}>M</Text>
           </TouchableOpacity>
@@ -265,6 +300,7 @@ export default function AddMedicine() {
             </TouchableOpacity>
           </View>
         </View>
+        <Button title="Add Medicine +" color="orange"/>
       </View>
     </ScrollView>
   );
@@ -275,6 +311,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+  },
+  inputField: {
+    width: 350,
+    height: 50,
+    borderBottomWidth: 1,
+    borderColor: "#800000",
+    margin: 5,
+    padding: 5,
+    fontSize: 20
   },
   textStyle: {
     fontSize: 20,
@@ -288,6 +333,35 @@ const styles = StyleSheet.create({
     margin: 5,
     fontSize: 20,
     fontFamily: "sans-serif",
+    color: "white",
+    backgroundColor: "orange",
+    padding: 3
+  },
+  radioAllBtnContainer:{
+    display: 'flex',
+    flexDirection: 'row',
+    margin: 10
+  },
+  radioAllBtn:{
+    width: 25,
+    height: 25,
+    borderRadius: 50,
+    borderWidth: 1,
+    borderColor: "#800000",
+    marginHorizontal: 15
+  },
+  radioAllBtnSelected: {
+    width: 25,
+    height: 25,
+    borderRadius: 50,
+    marginHorizontal: 15,
+    backgroundColor: "orange",
+    padding: 1,
+    elevation: 20
+  },
+  radioAllBtnText:{
+    fontSize: 15,
+    color: "#800000"
   },
   radioBtnContainer: {
     display: "flex",
@@ -300,7 +374,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     color: "#80000",
     width: 170,
-    margin: 3,
+    marginHorizontal: 3,
+    marginVertical: 10,
     elevation: 10
   },
   selectedButton: {
@@ -313,7 +388,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 50,
     color: "#80000", 
-    margin: 3,
+    marginHorizontal: 3,
+    marginVertical: 10,
     elevation: 10,
     height: 45,
   },
