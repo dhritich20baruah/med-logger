@@ -61,7 +61,7 @@ const Dashboard = ({ navigation, route }) => {
             <FontAwesome name="pills" size={50} color="#800000" />
             <Text style={styles.tileText}>Pill Tracker</Text>
             <TouchableOpacity
-              onPress={() => navigation.navigate("Pill Tracker")}
+              onPress={() => navigation.navigate("Pill Tracker", {userID})}
             >
               <Text style={styles.tileButton}>TRACK</Text>
             </TouchableOpacity>

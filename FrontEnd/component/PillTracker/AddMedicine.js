@@ -15,7 +15,9 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import ScrollPicker from "react-native-wheel-scrollview-picker";
 
-export default function AddMedicine() {
+export default function AddMedicine({navigation, route}) {
+  const { userID } = route.params;
+
   const [medicineName, setMedicineName] = useState("")
   const [date, setDate] = useState(new Date());
   const [showDate, setShowDate] = useState(false);
