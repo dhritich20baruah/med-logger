@@ -21,14 +21,6 @@ export default function AddMedicine({navigation, route}) {
   const [medicineName, setMedicineName] = useState("")
   const [date, setDate] = useState(new Date());
   const [showDate, setShowDate] = useState(false);
-  const [timing, setTiming] = useState({
-    BeforeBreakfast: false,
-    AfterBreakfast: false,
-    BeforeLunch: false,
-    AfterLunch: false,
-    BeforeDinner: false,
-    AfterDinner: false,
-  });
   const [days, setDays] = useState({
     sunday: false,
     monday: false,
@@ -38,6 +30,15 @@ export default function AddMedicine({navigation, route}) {
     friday: false,
     saturday: false,
   });
+  const [timing, setTiming] = useState({
+    BeforeBreakfast: false,
+    AfterBreakfast: false,
+    BeforeLunch: false,
+    AfterLunch: false,
+    BeforeDinner: false,
+    AfterDinner: false,
+  });
+
   const [allSelected, setAllSelected] = useState(false);
   const [selectedValue, setSelectedValue] = useState("January");
 

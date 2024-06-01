@@ -1,7 +1,7 @@
 // CalendarScreen.js
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Calendar } from 'react-native-calendars';
+import { Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { Agenda } from 'react-native-calendars';
 
 const CalendarScreen = () => {
   const [selectedDate, setSelectedDate] = useState('');
@@ -11,19 +11,20 @@ const CalendarScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.selectedDateText}>Selected Date: {selectedDate}</Text>
-      <Calendar
-        onDayPress={onDayPress}
-        markedDates={{
-          [selectedDate]: {
-            selected: true,
-            marked: true,
-            selectedColor: 'blue',
-          },
+    <SafeAreaView style={styles.container}>
+      <Agenda
+        selected="2022-12-01"
+        items={{
+          '2022-12-01': [{name: 'Cycling'}, {name: 'Walking'}, {name: 'Running'}],
+          '2022-12-02': [{name: 'Writing'}]
         }}
+        renderItem={(item, isFirst) => (
+          <TouchableOpacity style={styles.item}>
+            <Text style={styles.itemText}>{item.name}</Text>
+          </TouchableOpacity>
+        )}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
