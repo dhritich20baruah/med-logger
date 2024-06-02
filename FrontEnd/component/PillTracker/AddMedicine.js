@@ -40,7 +40,6 @@ export default function AddMedicine({navigation, route}) {
   });
 
   const [allSelected, setAllSelected] = useState(false);
-  const [selectedValue, setSelectedValue] = useState("January");
 
   const daysWeeksMonths = ["Days", "Weeks", "Months"];
 
@@ -73,11 +72,15 @@ export default function AddMedicine({navigation, route}) {
     setShowDate(!showDate);
   };
 
-  const onChange = (e, selectedDate) => {
-    setDate(selectedDate);
+  const handleDate = (e, selectedDate) => {
+    let dateString = selectedDate.toISOString();
+    setDate(dateString);
     toggleShowDate();
   };
 
+  const handleSave = () => {
+    console.log("name: ",medicineName, "start: ", date, "end: ", )
+  }
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -108,7 +111,7 @@ export default function AddMedicine({navigation, route}) {
               mode={"date"}
               is24Hour={true}
               display="spinner"
-              onChange={onChange}
+              onChange={handleDate}
             />
           )}
         </View>
@@ -303,7 +306,9 @@ export default function AddMedicine({navigation, route}) {
             </TouchableOpacity>
           </View>
         </View>
-        <Button title="Add Medicine +" color="orange"/>
+        <TouchableOpacity onPress={handleSave} style={styles.saveBtnContainer}>
+        <Text style={styles.saveBtn}>ADD MEDICINE +</Text>
+      </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -404,5 +409,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#800000",
     textAlign: "center",
+  },
+  saveBtnContainer: {
+    margin: 20,
+    padding: 10,
+    borderRadius: 50,
+    backgroundColor: "orange",
+    elevation: 15
+  },
+  saveBtn: {
+    color: "white",
+    textAlign: "center",
+    fontWeight: "bold",
   },
 });

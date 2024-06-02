@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   View,
+  Alert,
 } from "react-native";
 import { Agenda } from "react-native-calendars";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -13,141 +14,179 @@ import * as SQLite from "expo-sqlite";
 export default function Pills({ navigation, route }) {
   const { userID } = route.params;
   const [timingsAvailable, setTimingsAvailable] = useState(false);
-  const [time, setTime] = useState(new Date());
-  const [breakfast, setBreakfast] = useState();
-  const [lunch, setLunch] = useState();
-  const [dinner, setDinner] = useState();
-  const [visible, setVisible] = useState(false)
-  
+  const [breakfast, setBreakfast] = useState(new Date());
+  const [lunch, setLunch] = useState(new Date());
+  const [dinner, setDinner] = useState(new Date());
+  const [visibleBreakfast, setVisibleBreakfast] = useState(false);
+  const [visibleLunch, setVisibleLunch] = useState(false);
+  const [visibleDinner, setVisibleDinner] = useState(false);
+
   //DATABASE
   const db = SQLite.openDatabase("med-logger2.db");
-  const [selectedMeal, setSelectedMeal] = useState("");
-  const [mealTimings, setMealTimings] = useState({
-    breakfast: "",
-    lunch: "",
-    dinner: "",
-  });
 
-  const onChange = (e, selectedDate) => {
-    setTime(selectedDate);
-    setVisible(!visible)
-    console.log(getFormattedTime(time))
+  const onChangeBreakfast = (e, selectedDate) => {
+    setBreakfast(selectedDate);
+    setVisibleBreakfast(!visibleBreakfast);
+  };
+
+  const onChangeLunch = (e, selectedDate) => {
+    setLunch(selectedDate);
+    setVisibleLunch(!visibleLunch);
+  };
+
+  const onChangeDinner = (e, selectedDate) => {
+    setDinner(selectedDate);
+    setVisibleDinner(!visibleDinner);
   };
 
   const getFormattedTime = (date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-  
-  const handlePress = (meal) => {
-    setSelectedMeal(meal);
-    setVisible(!visible)
-  };
-
-  const handleSave = (time) => {
-    setMealTimings({
-      ...mealTimings,
-      [selectedMeal]: time,
+    return date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
     });
   };
 
-  // useEffect(() => {
-  //   db.transaction((tx) => {
-  //     tx.executeSql(
-  //       "CREATE TABLE IF NOT EXISTS meal_timings_test (id INTEGER PRIMARY KEY AUTOINCREMENT, breakfast TEXT, lunch TEXT, dinner TEXT)"
-  //     );
-  //   });
+  const handleSave = () => {
+    let breakfastTime = getFormattedTime(breakfast);
+    let lunchTime = getFormattedTime(lunch);
+    let dinnerTime = getFormattedTime(dinner);
+    console.log(breakfastTime, lunchTime, dinnerTime);
 
-  //   db.transaction((tx) => {
-  //     tx.executeSql(
-  //       "SELECT * FROM meal_timings_test",
-  //       null,
-  //       (txObj, resultSet) => {
-  //         if(resultSet.rows._array.length !== 0){
-  //           setTimingsAvailable(true)
-  //         };
-  //       },
-  //       (txObj, error) => console.log(error)
-  //     );
-  //   });
-  // }, []);
+    db.transaction((tx) => {
+      tx.executeSql(
+        "INSERT INTO meal_timings_test (breakfast, lunch, dinner, user_id) values (?, ?, ?, ?)",
+        [breakfastTime, lunchTime, dinnerTime, userID],
+        (txObj, resultSet) => {
+          Alert.alert("Timings saved");
+        },
+        (txObj, error) => console.log(error)
+      );
+    });
+  };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      {!timingsAvailable ? (
-        <View>
-          <Text style={styles.title}>Meal Timings</Text>
+  useEffect(() => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS meal_timings_test (id INTEGER PRIMARY KEY AUTOINCREMENT, breakfast TEXT, lunch TEXT, dinner TEXT, user_id INTEGER)"
+      );
+    });
 
-          <TouchableOpacity
-            onPress={() => handlePress("breakfast")}
-            style={styles.input}
-          >
-            <Text style={styles.inputText}>
-              {mealTimings.breakfast || "Set Breakfast Time"} {getFormattedTime(time)}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => handlePress("lunch")}
-            style={styles.input}
-          >
-            <Text style={styles.inputText}>
-              {mealTimings.lunch || "Set Lunch Time"}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => handlePress("dinner")}
-            style={styles.input}
-          >
-            <Text style={styles.inputText}>
-              {mealTimings.dinner || "Set Dinner Time"}
-            </Text>
-          </TouchableOpacity>
-          {
-            visible &&
-            <DateTimePicker
-            value={time}
-            mode={"time"}
-            is24Hour={true}
-            display="default"
-            onChange={onChange}
-            />
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM meal_timings_test WHERE user_id = ?",
+        [userID],
+        (txObj, resultSet) => {
+          if (resultSet.rows._array.length >= 1) {
+            setTimingsAvailable(!timingsAvailable);
           }
-        </View>
-      ) : (
-        <View>
-          <Agenda
-            selected="2024-06-01"
-            items={{
-              "2024-06-01": [
-                { name: "Cycling" },
-                { name: "Walking" },
-                { name: "Running" },
-              ],
-              "2024-06-01": [{ name: "Writing" }],
-            }}
-            renderItem={(item, isFirst) => (
-              <TouchableOpacity style={styles.item}>
-                <Text style={styles.itemText}>{item.name}</Text>
-              </TouchableOpacity>
-            )}
-            renderEmptyDate={() => (
-              <View style={styles.emptyDate}>
-                <Text>No Events</Text>
-              </View>
-            )}
-            rowHasChanged={(r1, r2) => r1.name !== r2.name}
-          />
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Add Medicine", { userID })}
-            style={styles.floatBtn}
-          >
-            <Text style={styles.btnText}>+</Text>
+        },
+        (txObj, error) => console.log(error)
+      );
+    });
+  }, []);
+
+  if (timingsAvailable) {
+    return(
+    <SafeAreaView style={styles.container}>
+      <Agenda
+        selected="2024-06-01"
+        items={{
+          "2024-06-01": [
+            { name: "Cycling" },
+            { name: "Walking" },
+            { name: "Running" },
+          ],
+          "2024-06-01": [{ name: "Writing" }],
+        }}
+        renderItem={(item, isFirst) => (
+          <TouchableOpacity style={styles.item}>
+            <Text style={styles.itemText}>{item.name}</Text>
           </TouchableOpacity>
-        </View>
-      )}
+        )}
+        renderEmptyDate={() => (
+          <View style={styles.emptyDate}>
+            <Text>No Events</Text>
+          </View>
+        )}
+        rowHasChanged={(r1, r2) => r1.name !== r2.name}
+      />
+      <TouchableOpacity
+        onPress={() => navigation.navigate("Add Medicine", { userID })}
+        style={styles.floatBtn}
+      >
+        <Text style={styles.btnText}>+</Text>
+      </TouchableOpacity>
     </SafeAreaView>
-  );
+    )
+  } else {
+    return(
+    <View style={styles.container}>
+      <Text style={styles.title}>
+        {" "}
+        Please enter your approximate times for having breakfast, lunch, and
+        dinner before adding medicines to your medicine tracker.
+      </Text>
+
+      {/* Breakfast */}
+      <TouchableOpacity
+        onPress={() => setVisibleBreakfast(!visibleBreakfast)}
+        style={styles.input}
+      >
+        <Text style={styles.inputText}>Set Breakfast Time</Text>
+        <Text style={styles.inputTime}>{getFormattedTime(breakfast)}</Text>
+      </TouchableOpacity>
+      {visibleBreakfast && (
+        <DateTimePicker
+          value={breakfast}
+          mode={"time"}
+          is24Hour={true}
+          display="default"
+          onChange={onChangeBreakfast}
+        />
+      )}
+
+      {/* Lunch */}
+      <TouchableOpacity
+        onPress={() => setVisibleLunch(!visibleLunch)}
+        style={styles.input}
+      >
+        <Text style={styles.inputText}>Set Lunch Time</Text>
+        <Text style={styles.inputTime}>{getFormattedTime(lunch)}</Text>
+      </TouchableOpacity>
+      {visibleLunch && (
+        <DateTimePicker
+          value={lunch}
+          mode={"time"}
+          is24Hour={true}
+          display="default"
+          onChange={onChangeLunch}
+        />
+      )}
+
+      {/* Dinner */}
+      <TouchableOpacity
+        onPress={() => setVisibleDinner(!visibleDinner)}
+        style={styles.input}
+      >
+        <Text style={styles.inputText}>Set Dinner Time</Text>
+        <Text style={styles.inputTime}>{getFormattedTime(dinner)}</Text>
+      </TouchableOpacity>
+      {visibleDinner && (
+        <DateTimePicker
+          value={dinner}
+          mode={"time"}
+          is24Hour={true}
+          display="default"
+          onChange={onChangeDinner}
+        />
+      )}
+      <TouchableOpacity onPress={handleSave} style={styles.saveBtnContainer}>
+        <Text style={styles.saveBtn}>SAVE</Text>
+      </TouchableOpacity>
+    </View>
+    )
+  }
 }
 
 const styles = StyleSheet.create({
@@ -189,17 +228,39 @@ const styles = StyleSheet.create({
     paddingTop: 30,
   },
   title: {
-    fontSize: 24,
-    marginBottom: 24,
+    fontSize: 18,
+    margin: 15,
+    textAlign: "center",
+    color: "#333",
+    fontWeight: "bold",
   },
   input: {
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
     marginBottom: 16,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   inputText: {
     fontSize: 18,
     color: "#333",
+  },
+  inputTime: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#800000",
+  },
+  saveBtnContainer: {
+    margin: 10,
+    padding: 10,
+    borderRadius: 50,
+    backgroundColor: "orange",
+  },
+  saveBtn: {
+    color: "white",
+    textAlign: "center",
+    fontWeight: "bold",
   },
 });
