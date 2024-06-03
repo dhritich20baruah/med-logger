@@ -17,6 +17,7 @@ export default function Pills({ navigation, route }) {
   const [breakfast, setBreakfast] = useState(new Date());
   const [lunch, setLunch] = useState(new Date());
   const [dinner, setDinner] = useState(new Date());
+  const [timings, setTimings] = useState([])
   const [visibleBreakfast, setVisibleBreakfast] = useState(false);
   const [visibleLunch, setVisibleLunch] = useState(false);
   const [visibleDinner, setVisibleDinner] = useState(false);
@@ -51,7 +52,6 @@ export default function Pills({ navigation, route }) {
     let breakfastTime = getFormattedTime(breakfast);
     let lunchTime = getFormattedTime(lunch);
     let dinnerTime = getFormattedTime(dinner);
-    console.log(breakfastTime, lunchTime, dinnerTime);
 
     db.transaction((tx) => {
       tx.executeSql(
@@ -79,6 +79,7 @@ export default function Pills({ navigation, route }) {
         (txObj, resultSet) => {
           if (resultSet.rows._array.length >= 1) {
             setTimingsAvailable(!timingsAvailable);
+            setTimings(resultSet.rows._array)
           }
         },
         (txObj, error) => console.log(error)
@@ -112,7 +113,7 @@ export default function Pills({ navigation, route }) {
         rowHasChanged={(r1, r2) => r1.name !== r2.name}
       />
       <TouchableOpacity
-        onPress={() => navigation.navigate("Add Medicine", { userID })}
+        onPress={() => navigation.navigate("Add Medicine", { userID, timings})}
         style={styles.floatBtn}
       >
         <Text style={styles.btnText}>+</Text>

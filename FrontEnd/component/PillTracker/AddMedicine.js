@@ -16,8 +16,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import ScrollPicker from "react-native-wheel-scrollview-picker";
 
 export default function AddMedicine({navigation, route}) {
-  const { userID } = route.params;
-
+  const { userID, timings } = route.params;
   const [medicineName, setMedicineName] = useState("")
   const [date, setDate] = useState(new Date());
   const [durationUnit, setDurationUnit] = useState('')
@@ -116,7 +115,13 @@ export default function AddMedicine({navigation, route}) {
     let duration = selectedValue + " " + durationUnit
     calculateEndDate(date, duration)
 
-    console.log("name: ",medicineName, "start: ", startDate, "end: ", endDate, "days: ", days.monday ? 1 : 0, "Timings: ", timing)
+    console.log("name: ",medicineName, "start: ", startDate, "end: ", endDate, "days: ", days.sunday ? 1 : 0, days.monday ? 1 : 0, days.tuesday ? 1 : 0, days.wednesday ? 1 : 0, days.thursday ? 1 : 0, days.friday ? 1 : 0, days.saturday ? 1 : 0, "Timings: ", 
+    timing.AfterBreakfast ? timings[0].breakfast : 0,
+    timing.AfterLunch ? timings[0].lunch : 0,
+    timing.AfterDinner ? timings[0].dinner : 0,
+    timing.BeforeBreakfast ? 1 : 0,
+    timing.BeforeLunch ? 1 : 0,
+    timing.BeforeDinner ? 1 : 0)
   }
   return (
     <ScrollView>
