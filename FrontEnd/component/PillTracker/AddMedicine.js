@@ -20,6 +20,9 @@ export default function AddMedicine({navigation, route}) {
 
   const [medicineName, setMedicineName] = useState("")
   const [date, setDate] = useState(new Date());
+  const [durationUnit, setDurationUnit] = useState('')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   const [showDate, setShowDate] = useState(false);
   const [days, setDays] = useState({
     sunday: false,
@@ -41,9 +44,10 @@ export default function AddMedicine({navigation, route}) {
 
   const [allSelected, setAllSelected] = useState(false);
 
+  // Scroll picker
   const daysWeeksMonths = ["Days", "Weeks", "Months"];
-
   const NumsArray = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+  const [selectedValue, setSelectedValue] = useState(NumsArray[0]);
 
   const handleDays = (key) => {
     setDays((prevSelections) => ({
@@ -74,12 +78,45 @@ export default function AddMedicine({navigation, route}) {
 
   const handleDate = (e, selectedDate) => {
     let dateString = selectedDate.toISOString();
-    setDate(dateString);
+    let formattedDate = dateString.slice(0, dateString.indexOf("T"))
+   
+    setDate(selectedDate);
+    setStartDate(formattedDate)
     toggleShowDate();
   };
 
+  const calculateEndDate = (date, duration) => {
+    const start = new Date(date);
+    let end;
+
+    if (duration.includes('Days')) {
+      const days = parseInt(duration.replace('days', '').trim(), 10);
+      console.log('Days')
+      end = new Date(start.setDate(start.getDate() + days));
+    } else if (duration.includes('Weeks')) {
+      const weeks = parseInt(duration.replace('weeks', '').trim(), 10);
+      console.log('Weeks')
+      end = new Date(start.setDate(start.getDate() + weeks * 7));
+    } else if (duration.includes('Months')) {
+      const months = parseInt(duration.replace('month', '').trim(), 10);
+      console.log('Months')
+      end = new Date(start.setMonth(start.getMonth() + months));
+    }
+    setEndDate(formatDate(end));
+  };
+
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
+    const day = ('0' + date.getDate()).slice(-2);
+    return `${year}-${month}-${day}`;
+  };
+
   const handleSave = () => {
-    console.log("name: ",medicineName, "start: ", date, "end: ", )
+    let duration = selectedValue + " " + durationUnit
+    calculateEndDate(date, duration)
+
+    console.log("name: ",medicineName, "start: ", startDate, "end: ", endDate, "days: ", days.monday ? 1 : 0, "Timings: ", timing)
   }
   return (
     <ScrollView>
@@ -130,9 +167,9 @@ export default function AddMedicine({navigation, route}) {
           >
             <ScrollPicker
               dataSource={NumsArray}
-              selectedIndex={1}
+              selectedIndex={0}
               onValueChange={(data, selectedIndex) => {
-                //
+                setSelectedValue(data)
               }}
               wrapperHeight={180}
               wrapperBackground="#FFFFFF"
@@ -143,9 +180,9 @@ export default function AddMedicine({navigation, route}) {
             />
             <ScrollPicker
               dataSource={daysWeeksMonths}
-              selectedIndex={1}
+              selectedIndex={0}
               onValueChange={(data, selectedIndex) => {
-                //
+                setDurationUnit(data)
               }}
               wrapperHeight={180}
               wrapperBackground="#FFFFFF"
@@ -414,8 +451,8 @@ const styles = StyleSheet.create({
     margin: 20,
     padding: 10,
     borderRadius: 50,
-    backgroundColor: "orange",
-    elevation: 15
+    backgroundColor: "#800000",
+    elevation: 25
   },
   saveBtn: {
     color: "white",
