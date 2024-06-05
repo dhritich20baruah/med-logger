@@ -17,11 +17,13 @@ export default function Pills({ navigation, route }) {
   const [breakfast, setBreakfast] = useState(new Date());
   const [lunch, setLunch] = useState(new Date());
   const [dinner, setDinner] = useState(new Date());
-  const [timings, setTimings] = useState([])
+  const [timings, setTimings] = useState([]);
   const [visibleBreakfast, setVisibleBreakfast] = useState(false);
   const [visibleLunch, setVisibleLunch] = useState(false);
   const [visibleDinner, setVisibleDinner] = useState(false);
+  const [medicineData, setMedicineData] = useState([]);
 
+  const today = new Date().toISOString().split('T')[0];
   //DATABASE
   const db = SQLite.openDatabase("med-logger2.db");
 
@@ -79,114 +81,164 @@ export default function Pills({ navigation, route }) {
         (txObj, resultSet) => {
           if (resultSet.rows._array.length >= 1) {
             setTimingsAvailable(!timingsAvailable);
-            setTimings(resultSet.rows._array)
+            setTimings(resultSet.rows._array);
           }
+        },
+        (txObj, error) => console.log(error)
+      );
+    });
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM medicine_list WHERE user_id = ?",
+        [userID],
+        (txObj, resultSet) => {
+          setMedicineData(resultSet.rows._array);
+          console.log(resultSet.rows._array);
         },
         (txObj, error) => console.log(error)
       );
     });
   }, []);
 
+  // Function to transform the data
+  const transformData = (data) => {
+    const items = {};
+
+    data.forEach((entry) => {
+      const startDate = new Date(entry.startDate);
+      const endDate = new Date(entry.endDate);
+      const medicineName = entry.medicineName;
+
+      // Loop through each day from startDate to endDate
+      for (
+        let date = startDate;
+        date <= endDate;
+        date.setDate(date.getDate() + 1)
+      ) {
+        const dayOfWeek = date.getDay();
+        const dateString = date.toISOString().split("T")[0];
+
+        // Check if the medicine is taken on this day
+        if (
+          (dayOfWeek === 0 && entry.sunday) ||
+          (dayOfWeek === 1 && entry.monday) ||
+          (dayOfWeek === 2 && entry.tuesday) ||
+          (dayOfWeek === 3 && entry.wednesday) ||
+          (dayOfWeek === 4 && entry.thursday) ||
+          (dayOfWeek === 5 && entry.friday) ||
+          (dayOfWeek === 6 && entry.saturday)
+        ) {
+          if (!items[dateString]) {
+            items[dateString] = [];
+          }
+
+          items[dateString].push({ name: medicineName });
+        }
+      }
+    });
+
+    return items;
+  };
+
+  // Transformed data
+  const agendaItems = transformData(medicineData);
+
   if (timingsAvailable) {
-    return(
-    <SafeAreaView style={styles.container}>
-      <Agenda
-        selected="2024-06-01"
-        items={{
-          "2024-06-01": [
-            { name: "Cycling" },
-            { name: "Walking" },
-            { name: "Running" },
-          ],
-          "2024-06-01": [{ name: "Writing" }],
-        }}
-        renderItem={(item, isFirst) => (
-          <TouchableOpacity style={styles.item}>
-            <Text style={styles.itemText}>{item.name}</Text>
-          </TouchableOpacity>
-        )}
-        renderEmptyDate={() => (
-          <View style={styles.emptyDate}>
-            <Text>No Events</Text>
-          </View>
-        )}
-        rowHasChanged={(r1, r2) => r1.name !== r2.name}
-      />
-      <TouchableOpacity
-        onPress={() => navigation.navigate("Add Medicine", { userID, timings})}
-        style={styles.floatBtn}
-      >
-        <Text style={styles.btnText}>+</Text>
-      </TouchableOpacity>
-    </SafeAreaView>
-    )
+    return (
+      <SafeAreaView style={styles.container}>
+        <Agenda
+          selected={today}
+          items={agendaItems}
+          renderItem={(item, isFirst) => (
+            <TouchableOpacity style={styles.item}>
+              <Text style={styles.itemText}>{item.name}</Text>
+            </TouchableOpacity>
+          )}
+          renderEmptyDate={() => (
+            <View style={styles.emptyDate}>
+              <Text>No Events</Text>
+            </View>
+          )}
+          rowHasChanged={(r1, r2) => r1.name !== r2.name}
+        />
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate("Add Medicine", { userID, timings })
+          }
+          style={styles.floatBtn}
+        >
+          <Text style={styles.btnText}>Add Medicine +</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
   } else {
-    return(
-    <View style={styles.container}>
-      <Text style={styles.title}>
-        {" "}
-        Please enter your approximate times for having breakfast, lunch, and
-        dinner before adding medicines to your medicine tracker.
-      </Text>
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>
+          {" "}
+          Please enter your approximate times for having breakfast, lunch, and
+          dinner before adding medicines to your medicine tracker.
+        </Text>
 
-      {/* Breakfast */}
-      <TouchableOpacity
-        onPress={() => setVisibleBreakfast(!visibleBreakfast)}
-        style={styles.input}
-      >
-        <Text style={styles.inputText}>Set Breakfast Time</Text>
-        <Text style={styles.inputTime}>{getFormattedTime(breakfast)}</Text>
-      </TouchableOpacity>
-      {visibleBreakfast && (
-        <DateTimePicker
-          value={breakfast}
-          mode={"time"}
-          is24Hour={true}
-          display="default"
-          onChange={onChangeBreakfast}
-        />
-      )}
+        {/* Breakfast */}
+        <TouchableOpacity
+          onPress={() => setVisibleBreakfast(!visibleBreakfast)}
+          style={styles.input}
+        >
+          <Text style={styles.inputText}>Set Breakfast Time</Text>
+          <Text style={styles.inputTime}>{getFormattedTime(breakfast)}</Text>
+        </TouchableOpacity>
+        {visibleBreakfast && (
+          <DateTimePicker
+            value={breakfast}
+            mode={"time"}
+            is24Hour={true}
+            display="default"
+            onChange={onChangeBreakfast}
+          />
+        )}
 
-      {/* Lunch */}
-      <TouchableOpacity
-        onPress={() => setVisibleLunch(!visibleLunch)}
-        style={styles.input}
-      >
-        <Text style={styles.inputText}>Set Lunch Time</Text>
-        <Text style={styles.inputTime}>{getFormattedTime(lunch)}</Text>
-      </TouchableOpacity>
-      {visibleLunch && (
-        <DateTimePicker
-          value={lunch}
-          mode={"time"}
-          is24Hour={true}
-          display="default"
-          onChange={onChangeLunch}
-        />
-      )}
+        {/* Lunch */}
+        <TouchableOpacity
+          onPress={() => setVisibleLunch(!visibleLunch)}
+          style={styles.input}
+        >
+          <Text style={styles.inputText}>Set Lunch Time</Text>
+          <Text style={styles.inputTime}>{getFormattedTime(lunch)}</Text>
+        </TouchableOpacity>
+        {visibleLunch && (
+          <DateTimePicker
+            value={lunch}
+            mode={"time"}
+            is24Hour={true}
+            display="default"
+            onChange={onChangeLunch}
+          />
+        )}
 
-      {/* Dinner */}
-      <TouchableOpacity
-        onPress={() => setVisibleDinner(!visibleDinner)}
-        style={styles.input}
-      >
-        <Text style={styles.inputText}>Set Dinner Time</Text>
-        <Text style={styles.inputTime}>{getFormattedTime(dinner)}</Text>
-      </TouchableOpacity>
-      {visibleDinner && (
-        <DateTimePicker
-          value={dinner}
-          mode={"time"}
-          is24Hour={true}
-          display="default"
-          onChange={onChangeDinner}
-        />
-      )}
-      <TouchableOpacity onPress={handleSave} style={styles.saveBtnContainer}>
-        <Text style={styles.saveBtn}>SAVE</Text>
-      </TouchableOpacity>
-    </View>
-    )
+        {/* Dinner */}
+        <TouchableOpacity
+          onPress={() => setVisibleDinner(!visibleDinner)}
+          style={styles.input}
+        >
+          <Text style={styles.inputText}>Set Dinner Time</Text>
+          <Text style={styles.inputTime}>{getFormattedTime(dinner)}</Text>
+        </TouchableOpacity>
+        {visibleDinner && (
+          <DateTimePicker
+            value={dinner}
+            mode={"time"}
+            is24Hour={true}
+            display="default"
+            onChange={onChangeDinner}
+          />
+        )}
+        <TouchableOpacity onPress={handleSave} style={styles.saveBtnContainer}>
+          <Text style={styles.saveBtn}>SAVE</Text>
+        </TouchableOpacity>
+      </View>
+    );
   }
 }
 
@@ -208,20 +260,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   floatBtn: {
-    width: 50,
-    height: 50,
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#800000",
     position: "absolute",
-    borderRadius: 50,
+    borderRadius: 10,
     top: 650,
     right: 30,
+    padding: 3,
   },
   btnText: {
     color: "white",
-    fontSize: 30,
+    fontSize: 18,
+    padding: 3,
   },
   emptyDate: {
     height: 15,
