@@ -52,14 +52,6 @@ export default function AddMedicine({ navigation, route }) {
         "CREATE TABLE IF NOT EXISTS medicine_list (id INTEGER PRIMARY KEY AUTOINCREMENT, medicineName TEXT, startDate TEXT, endDate TEXT, sunday INTEGER, monday INTEGER, tuesday INTEGER, wednesday INTEGER, thursday INTEGER, friday INTEGER, saturday INTEGER, BeforeBreakfast TEXT, AfterBreakfast TEXT, BeforeLunch TEXT, AfterLunch TEXT, BeforeDinner TEXT, AfterDinner TEXT, user_id INTEGER)"
       );
     });
-    db.transaction((tx) => {
-      tx.executeSql(
-        "SELECT * FROM medicine_list WHERE user_id = ?",
-        [userID],
-        (txObj, resultSet) => console.log(resultSet.rows._array),
-        (txObj, error) => console.log(error)
-      )
-    })
   }, []);
 
   // Scroll picker
@@ -172,7 +164,7 @@ export default function AddMedicine({ navigation, route }) {
         ],
         (txObj, resultSet) => {
           Alert.alert("Medicine Added")
-          navigation.goBack()
+          navigation.navigate("Dashboard", {userID})
         },
         (txObj, error) => console.log(error)
       );

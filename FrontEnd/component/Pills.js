@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback  } from "react";
 import {
   Text,
   StyleSheet,
@@ -11,6 +11,13 @@ import { Agenda } from "react-native-calendars";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as SQLite from "expo-sqlite";
 
+// Memoized Item Component
+const MemoizedItem = React.memo(({ item }) => (
+  <TouchableOpacity style={styles.item}>
+    <Text style={styles.itemText}>{item.name}</Text>
+  </TouchableOpacity>
+));
+
 export default function Pills({ navigation, route }) {
   const { userID } = route.params;
   const [timingsAvailable, setTimingsAvailable] = useState(false);
@@ -22,8 +29,8 @@ export default function Pills({ navigation, route }) {
   const [visibleLunch, setVisibleLunch] = useState(false);
   const [visibleDinner, setVisibleDinner] = useState(false);
   const [medicineData, setMedicineData] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
-  const today = new Date().toISOString().split('T')[0];
   //DATABASE
   const db = SQLite.openDatabase("med-logger2.db");
 
@@ -94,7 +101,6 @@ export default function Pills({ navigation, route }) {
         [userID],
         (txObj, resultSet) => {
           setMedicineData(resultSet.rows._array);
-          console.log(resultSet.rows._array);
         },
         (txObj, error) => console.log(error)
       );
@@ -144,22 +150,30 @@ export default function Pills({ navigation, route }) {
   // Transformed data
   const agendaItems = transformData(medicineData);
 
+  const renderItem = useCallback(
+    (item, isFirst) => <MemoizedItem item={item} />,
+    []
+  );
+
+  const renderEmptyDate = useCallback(
+    () => (
+      <View style={styles.emptyDate}>
+        <Text>No medication for today</Text>
+      </View>
+    ),
+    []
+  );
+
   if (timingsAvailable) {
     return (
       <SafeAreaView style={styles.container}>
         <Agenda
-          selected={today}
-          items={agendaItems}
-          renderItem={(item, isFirst) => (
-            <TouchableOpacity style={styles.item}>
-              <Text style={styles.itemText}>{item.name}</Text>
-            </TouchableOpacity>
-          )}
-          renderEmptyDate={() => (
-            <View style={styles.emptyDate}>
-              <Text>No Events</Text>
-            </View>
-          )}
+          selected={selectedDate}
+          items={agendaItems[selectedDate] ? { [selectedDate]: agendaItems[selectedDate] } : {}}
+          onDayPress={(day) => setSelectedDate(day.dateString)}
+          renderItem={renderItem}
+          renderEmptyDate={renderEmptyDate}
+          markingType={'dot'}
           rowHasChanged={(r1, r2) => r1.name !== r2.name}
         />
         <TouchableOpacity
@@ -258,6 +272,13 @@ const styles = StyleSheet.create({
   itemText: {
     color: "#888",
     fontSize: 16,
+  },
+  emptyDate: {
+    height: 15,
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 30,
   },
   floatBtn: {
     flex: 1,
