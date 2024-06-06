@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback  } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Text,
   StyleSheet,
@@ -6,17 +6,13 @@ import {
   SafeAreaView,
   View,
   Alert,
+  Modal,
+  Button,
 } from "react-native";
 import { Agenda } from "react-native-calendars";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as SQLite from "expo-sqlite";
-
-// Memoized Item Component
-const MemoizedItem = React.memo(({ item }) => (
-  <TouchableOpacity style={styles.item}>
-    <Text style={styles.itemText}>{item.name}</Text>
-  </TouchableOpacity>
-));
+import FontAwesome from "@expo/vector-icons/FontAwesome6";
 
 export default function Pills({ navigation, route }) {
   const { userID } = route.params;
@@ -29,7 +25,11 @@ export default function Pills({ navigation, route }) {
   const [visibleLunch, setVisibleLunch] = useState(false);
   const [visibleDinner, setVisibleDinner] = useState(false);
   const [medicineData, setMedicineData] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
+  const [modalVisible, setModalVisible] = useState(false);
+  const [medicineDetails, setMedicineDetails] = useState([]);
 
   //DATABASE
   const db = SQLite.openDatabase("med-logger2.db");
@@ -83,11 +83,17 @@ export default function Pills({ navigation, route }) {
 
     db.transaction((tx) => {
       tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS medicine_list (id INTEGER PRIMARY KEY AUTOINCREMENT, medicineName TEXT, startDate TEXT, endDate TEXT, sunday INTEGER, monday INTEGER, tuesday INTEGER, wednesday INTEGER, thursday INTEGER, friday INTEGER, saturday INTEGER, BeforeBreakfast TEXT, AfterBreakfast TEXT, BeforeLunch TEXT, AfterLunch TEXT, BeforeDinner TEXT, AfterDinner TEXT, user_id INTEGER)"
+      );
+    });
+
+    db.transaction((tx) => {
+      tx.executeSql(
         "SELECT * FROM meal_timings_test WHERE user_id = ?",
         [userID],
         (txObj, resultSet) => {
           if (resultSet.rows._array.length >= 1) {
-            setTimingsAvailable(!timingsAvailable);
+            setTimingsAvailable(true);
             setTimings(resultSet.rows._array);
           }
         },
@@ -107,6 +113,13 @@ export default function Pills({ navigation, route }) {
     });
   }, []);
 
+  // Memoized Item Component
+  const MemoizedItem = React.memo(({ item }) => (
+    <TouchableOpacity style={styles.item} onPress={() => modalInfo(item.id)}>
+      <Text style={styles.itemText}>{item.name}</Text>
+    </TouchableOpacity>
+  ));
+
   // Function to transform the data
   const transformData = (data) => {
     const items = {};
@@ -115,6 +128,7 @@ export default function Pills({ navigation, route }) {
       const startDate = new Date(entry.startDate);
       const endDate = new Date(entry.endDate);
       const medicineName = entry.medicineName;
+      const medId = entry.id;
 
       // Loop through each day from startDate to endDate
       for (
@@ -139,7 +153,7 @@ export default function Pills({ navigation, route }) {
             items[dateString] = [];
           }
 
-          items[dateString].push({ name: medicineName });
+          items[dateString].push({ name: medicineName, id: medId });
         }
       }
     });
@@ -164,18 +178,95 @@ export default function Pills({ navigation, route }) {
     []
   );
 
+  // MODAL FUNCTION
+  const modalInfo = (id) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM medicine_list WHERE id = ? AND user_id = ?",
+        [id, userID],
+        (txObj, resultSet) => {
+          if (resultSet.rows._array.length > 0) {
+            const selectedMedicine = resultSet.rows._array[0];
+            setMedicineDetails(selectedMedicine);
+            setModalVisible(true);
+          } else {
+            console.log("No medicine found with the given id");
+          }
+        },
+        (txObj, error) => console.log("Error fetching medicine details:", error)
+      );
+    });
+  };
+
   if (timingsAvailable) {
     return (
       <SafeAreaView style={styles.container}>
         <Agenda
           selected={selectedDate}
-          items={agendaItems[selectedDate] ? { [selectedDate]: agendaItems[selectedDate] } : {}}
+          items={
+            agendaItems[selectedDate]
+              ? { [selectedDate]: agendaItems[selectedDate] }
+              : {}
+          }
           onDayPress={(day) => setSelectedDate(day.dateString)}
           renderItem={renderItem}
           renderEmptyDate={renderEmptyDate}
-          markingType={'dot'}
+          markingType={"dot"}
           rowHasChanged={(r1, r2) => r1.name !== r2.name}
         />
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(false);
+          }}
+        >
+          <View>
+            <View style={styles.modalView}>
+              <View
+                style={{
+                  fontSize: 20,
+                  margin: 5,
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                {medicineDetails && (
+                  <View style={{ fontSize: 20, margin: 5 }}>
+                    <Text>{medicineDetails.medicineName}</Text>
+                    <Text>Start Date: {medicineDetails.startDate}</Text>
+                    <Text>End Date: {medicineDetails.endDate}</Text>
+                    <Text>
+                      Before Breakfast: {medicineDetails.BeforeBreakfast}
+                    </Text>
+                    <Text>
+                      After Breakfast: {medicineDetails.AfterBreakfast}
+                    </Text>
+                    <Text>Before Lunch: {medicineDetails.BeforeLunch}</Text>
+                    <Text>After Lunch: {medicineDetails.AfterLunch}</Text>
+                    <Text>Before Dinner: {medicineDetails.BeforeDinner}</Text>
+                    <Text>After Dinner: {medicineDetails.AfterDinner}</Text>
+                  </View>
+                )}
+                <View style={{ display: "flex", flexDirection: "row" }}>
+                  <TouchableOpacity style={{ margin: 5 }}>
+                    <FontAwesome name="trash-can" size={20} color="red" />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={{ margin: 5 }}>
+                    <FontAwesome name="pen-to-square" size={20} color="blue" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <Button
+                onPress={() => setModalVisible(false)}
+                title="Close"
+                color={"orange"}
+              />
+            </View>
+          </View>
+        </Modal>
         <TouchableOpacity
           onPress={() =>
             navigation.navigate("Add Medicine", { userID, timings })
@@ -336,5 +427,26 @@ const styles = StyleSheet.create({
     color: "white",
     textAlign: "center",
     fontWeight: "bold",
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 5,
+    width: 350,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontSize: 20,
   },
 });

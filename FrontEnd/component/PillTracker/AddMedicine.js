@@ -19,9 +19,13 @@ import * as SQLite from "expo-sqlite";
 export default function AddMedicine({ navigation, route }) {
   const { userID, timings } = route.params;
   const [medicineName, setMedicineName] = useState("");
+
+  let dateString = new Date().toISOString();
+  let formattedDate = dateString.slice(0, dateString.indexOf("T"));
+
   const [date, setDate] = useState(new Date());
   const [durationUnit, setDurationUnit] = useState("Days");
-  const [startDate, setStartDate] = useState("");
+  const [startDate, setStartDate] = useState(formattedDate);
   const [endDate, setEndDate] = useState("2024-06-20");
   const [showDate, setShowDate] = useState(false);
   const [days, setDays] = useState({
@@ -45,14 +49,6 @@ export default function AddMedicine({ navigation, route }) {
 
   //DATABASE
   const db = SQLite.openDatabase("med-logger2.db");
-
-  useEffect(() => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        "CREATE TABLE IF NOT EXISTS medicine_list (id INTEGER PRIMARY KEY AUTOINCREMENT, medicineName TEXT, startDate TEXT, endDate TEXT, sunday INTEGER, monday INTEGER, tuesday INTEGER, wednesday INTEGER, thursday INTEGER, friday INTEGER, saturday INTEGER, BeforeBreakfast TEXT, AfterBreakfast TEXT, BeforeLunch TEXT, AfterLunch TEXT, BeforeDinner TEXT, AfterDinner TEXT, user_id INTEGER)"
-      );
-    });
-  }, []);
 
   // Scroll picker
   const daysWeeksMonths = ["Days", "Weeks", "Months"];
