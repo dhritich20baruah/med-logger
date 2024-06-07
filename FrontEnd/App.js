@@ -21,6 +21,7 @@ import History from "./component/History";
 import Display from "./component/Display";
 import CalendarScreen from "./component/CalendarScreen";
 import AddMedicine from "./component/PillTracker/AddMedicine";
+import EditMedicine from "./component/PillTracker/EditMedicine";
 
 function HomeScreen({ navigation, route }) {
   const [name, setName] = useState("");
@@ -395,6 +396,15 @@ export default function App() {
          <Stack.Screen
           name="Add Medicine"
           component={AddMedicine}
+          options={() => ({
+            headerStyle: {
+              backgroundColor: "#800000",
+            },
+          })}
+        />
+        <Stack.Screen
+          name="Edit Medication"
+          component={EditMedicine}
           options={() => ({
             headerStyle: {
               backgroundColor: "#800000",

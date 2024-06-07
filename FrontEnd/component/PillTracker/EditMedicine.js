@@ -16,9 +16,10 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import ScrollPicker from "react-native-wheel-scrollview-picker";
 import * as SQLite from "expo-sqlite";
 
-export default function AddMedicine({ navigation, route }) {
-  const { userID, timings } = route.params;
-  const [medicineName, setMedicineName] = useState("");
+export default function EditMedicine({ navigation, route }) {
+  const { userID, medicineDetails } = route.params;
+  console.log(medicineDetails, userID, "TESTING")
+  const [medicineName, setMedicineName] = useState(medicineDetails.medicineName);
 
   let dateString = new Date().toISOString();
   let formattedDate = dateString.slice(0, dateString.indexOf("T"));
@@ -29,21 +30,21 @@ export default function AddMedicine({ navigation, route }) {
   const [endDate, setEndDate] = useState("2024-06-20");
   const [showDate, setShowDate] = useState(false);
   const [days, setDays] = useState({
-    sunday: false,
-    monday: false,
-    tuesday: false,
-    wednesday: false,
-    thursday: false,
-    friday: false,
-    saturday: false,
+    sunday: medicineDetails.sunday,
+    monday: medicineDetails.monday,
+    tuesday: medicineDetails.tuesday,
+    wednesday: medicineDetails.wednesday,
+    thursday: medicineDetails.thursday,
+    friday: medicineDetails.friday,
+    saturday: medicineDetails.saturday,
   });
   const [timing, setTiming] = useState({
-    BeforeBreakfast: false,
-    AfterBreakfast: false,
-    BeforeLunch: false,
-    AfterLunch: false,
-    BeforeDinner: false,
-    AfterDinner: false,
+    BeforeBreakfast: medicineDetails.BeforeBreakfast,
+    AfterBreakfast: medicineDetails.AfterBreakfast,
+    BeforeLunch: medicineDetails.BeforeLunch,
+    AfterLunch: medicineDetails.AfterLunch,
+    BeforeDinner: medicineDetails.BeforeDinner,
+    AfterDinner: medicineDetails.AfterDinner,
   });
   const [allSelected, setAllSelected] = useState(false);
 
@@ -135,36 +136,38 @@ export default function AddMedicine({ navigation, route }) {
   const handleSave = async () => {
     calculateEndDate(date, `${selectedValue} + " " + ${durationUnit}`);
 
-    db.transaction((tx) => {
-      tx.executeSql(
-        `INSERT INTO medicine_list (medicineName, startDate, endDate, sunday, monday, tuesday, wednesday, thursday, friday, saturday, BeforeBreakfast, AfterBreakfast, BeforeLunch, AfterLunch, BeforeDinner, AfterDinner, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          medicineName,
-          startDate,
-          endDate,
-          days.sunday ? 1 : 0,
-          days.monday ? 1 : 0,
-          days.tuesday ? 1 : 0,
-          days.wednesday ? 1 : 0,
-          days.thursday ? 1 : 0,
-          days.friday ? 1 : 0,
-          days.saturday ? 1 : 0,
-          timing.BeforeBreakfast ? subtractMinutes(timings[0].breakfast) : "",
-          timing.AfterBreakfast ? timings[0].breakfast: "",
-          timing.BeforeLunch ? subtractMinutes(timings[0].lunch) : "",
-          timing.AfterLunch ? timings[0].lunch : "",
-          timing.BeforeDinner ? subtractMinutes(timings[0].dinner) : "",
-          timing.AfterDinner ? timings[0].dinner : "",
-          userID,
-        ],
-        (txObj, resultSet) => {
-          Alert.alert("Medicine Added")
-          navigation.navigate("Dashboard", {userID})
-        },
-        (txObj, error) => console.log(error)
-      );
+    console.log("medicineName")
 
-    });
+    // db.transaction((tx) => {
+    //   tx.executeSql(
+    //     `INSERT INTO medicine_list (medicineName, startDate, endDate, sunday, monday, tuesday, wednesday, thursday, friday, saturday, BeforeBreakfast, AfterBreakfast, BeforeLunch, AfterLunch, BeforeDinner, AfterDinner, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    //     [
+    //       medicineName,
+    //       startDate,
+    //       endDate,
+    //       days.sunday ? 1 : 0,
+    //       days.monday ? 1 : 0,
+    //       days.tuesday ? 1 : 0,
+    //       days.wednesday ? 1 : 0,
+    //       days.thursday ? 1 : 0,
+    //       days.friday ? 1 : 0,
+    //       days.saturday ? 1 : 0,
+    //       timing.BeforeBreakfast ? subtractMinutes(timings[0].breakfast) : "",
+    //       timing.AfterBreakfast ? timings[0].breakfast: "",
+    //       timing.BeforeLunch ? subtractMinutes(timings[0].lunch) : "",
+    //       timing.AfterLunch ? timings[0].lunch : "",
+    //       timing.BeforeDinner ? subtractMinutes(timings[0].dinner) : "",
+    //       timing.AfterDinner ? timings[0].dinner : "",
+    //       userID,
+    //     ],
+    //     (txObj, resultSet) => {
+    //       Alert.alert("Medicine Added")
+    //       navigation.navigate("Dashboard", {userID})
+    //     },
+    //     (txObj, error) => console.log(error)
+    //   );
+
+    // });
   };
   return (
     <ScrollView>
@@ -183,7 +186,7 @@ export default function AddMedicine({ navigation, route }) {
         {/* START DATE */}
         <View>
           <Text style={styles.textStyle}>
-            When will you start taking the medicine?
+            When did you start taking the medicine?
           </Text>
           <TouchableOpacity onPress={toggleShowDate}>
             <Text style={styles.textStyleSecondary}>{date.toDateString()}</Text>

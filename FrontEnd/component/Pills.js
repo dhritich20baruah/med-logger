@@ -198,6 +198,36 @@ export default function Pills({ navigation, route }) {
     });
   };
 
+  // DELETE MEDICINE
+  const deleteMed = (id) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "DELETE FROM medicine_list WHERE id=?",
+        [id],
+        (txObj, resultSet) => {
+          if (resultSet.rowsAffected > 0) {
+            Alert.alert("Medicine is removed");
+            // Update the state by filtering out the deleted medicine
+            setMedicineData((prevMedicineData) =>
+              prevMedicineData.filter((medicine) => medicine.id !== id)
+            );
+            // Close the modal
+            setModalVisible(false);
+          }
+        },
+        (txObj, error) => console.log(error)
+      );
+    });
+  };
+
+  const EditMedicine = () => {
+    setModalVisible(false)
+    navigation.navigate("Edit Medication", {
+      userID,
+      medicineDetails,
+    })
+  }
+
   if (timingsAvailable) {
     return (
       <SafeAreaView style={styles.container}>
@@ -222,49 +252,103 @@ export default function Pills({ navigation, route }) {
             setModalVisible(false);
           }}
         >
-          <View>
-            <View style={styles.modalView}>
-              <View
-                style={{
-                  fontSize: 20,
-                  margin: 5,
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                }}
+          <View style={styles.modalView}>
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "flex-end",
+                borderBottomWidth: 2,
+                borderBottomColor: "#800000",
+              }}
+            >
+              <TouchableOpacity style={{ margin: 10 }}>
+                <FontAwesome
+                  name="trash-can"
+                  size={25}
+                  color="#800000"
+                  onPress={() => deleteMed(medicineDetails.id)}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ margin: 10 }}
+                onPress={EditMedicine}
               >
-                {medicineDetails && (
-                  <View style={{ fontSize: 20, margin: 5 }}>
-                    <Text>{medicineDetails.medicineName}</Text>
-                    <Text>Start Date: {medicineDetails.startDate}</Text>
-                    <Text>End Date: {medicineDetails.endDate}</Text>
-                    <Text>
-                      Before Breakfast: {medicineDetails.BeforeBreakfast}
-                    </Text>
-                    <Text>
-                      After Breakfast: {medicineDetails.AfterBreakfast}
-                    </Text>
-                    <Text>Before Lunch: {medicineDetails.BeforeLunch}</Text>
-                    <Text>After Lunch: {medicineDetails.AfterLunch}</Text>
-                    <Text>Before Dinner: {medicineDetails.BeforeDinner}</Text>
-                    <Text>After Dinner: {medicineDetails.AfterDinner}</Text>
-                  </View>
-                )}
-                <View style={{ display: "flex", flexDirection: "row" }}>
-                  <TouchableOpacity style={{ margin: 5 }}>
-                    <FontAwesome name="trash-can" size={20} color="red" />
-                  </TouchableOpacity>
-                  <TouchableOpacity style={{ margin: 5 }}>
-                    <FontAwesome name="pen-to-square" size={20} color="blue" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-              <Button
-                onPress={() => setModalVisible(false)}
-                title="Close"
-                color={"orange"}
-              />
+                <FontAwesome name="pen-to-square" size={25} color="#800000" />
+              </TouchableOpacity>
             </View>
+            <View>
+              {medicineDetails && (
+                <View>
+                  <Text style={styles.modalTitle}>
+                    {medicineDetails.medicineName}
+                  </Text>
+                  <Text style={styles.modalText}>
+                    You need to take this medicine-
+                  </Text>
+                  <View>
+                    {medicineDetails.BeforeBreakfast ? (
+                      <Text style={styles.modalText}>
+                        Before Breakfast: {medicineDetails.BeforeBreakfast}
+                      </Text>
+                    ) : (
+                      <View></View>
+                    )}
+                  </View>
+                  <View>
+                    {medicineDetails.AfterBreakfast ? (
+                      <Text style={styles.modalText}>
+                        After Breakfast: {medicineDetails.AfterBreakfast}
+                      </Text>
+                    ) : (
+                      <View></View>
+                    )}
+                  </View>
+                  <View>
+                    {medicineDetails.BeforeLunch ? (
+                      <Text style={styles.modalText}>
+                        Before Lunch: {medicineDetails.BeforeLunch}
+                      </Text>
+                    ) : (
+                      <View></View>
+                    )}
+                  </View>
+                  <View>
+                    {medicineDetails.AfterLunch ? (
+                      <Text style={styles.modalText}>
+                        After Lunch: {medicineDetails.AfterLunch}
+                      </Text>
+                    ) : (
+                      <View></View>
+                    )}
+                  </View>
+                  <View>
+                    {medicineDetails.BeforeDinner ? (
+                      <Text style={styles.modalText}>
+                        Before Dinner: {medicineDetails.BeforeDinner}
+                      </Text>
+                    ) : (
+                      <View></View>
+                    )}
+                  </View>
+                  <View>
+                    {medicineDetails.AfterDinner ? (
+                      <Text style={styles.modalText}>
+                        After Dinner: {medicineDetails.AfterDinner}
+                      </Text>
+                    ) : (
+                      <View></View>
+                    )}
+                  </View>
+                </View>
+              )}
+            </View>
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              style={styles.saveBtnContainer}
+            >
+              <Text style={styles.saveBtn}>CLOSE</Text>
+            </TouchableOpacity>
           </View>
         </Modal>
         <TouchableOpacity
@@ -434,7 +518,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 5,
     width: 350,
-    alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -444,9 +527,29 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  modalText: {
-    marginBottom: 15,
+  modalTitle: {
+    margin: 5,
     textAlign: "center",
     fontSize: 20,
+    fontWeight: "600",
+    color: "#800000",
+  },
+  modalText: {
+    margin: 5,
+    textAlign: "center",
+    fontSize: 15,
+    color: "#800000",
+  },
+  saveBtnContainer: {
+    margin: 20,
+    padding: 10,
+    borderRadius: 50,
+    backgroundColor: "#800000",
+    elevation: 25,
+  },
+  saveBtn: {
+    color: "white",
+    textAlign: "center",
+    fontWeight: "bold",
   },
 });
