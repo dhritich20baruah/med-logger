@@ -225,6 +225,7 @@ export default function Pills({ navigation, route }) {
     navigation.navigate("Edit Medication", {
       userID,
       medicineDetails,
+      timings
     })
   }
 

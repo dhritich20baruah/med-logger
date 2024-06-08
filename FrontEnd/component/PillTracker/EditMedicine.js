@@ -17,17 +17,15 @@ import ScrollPicker from "react-native-wheel-scrollview-picker";
 import * as SQLite from "expo-sqlite";
 
 export default function EditMedicine({ navigation, route }) {
-  const { userID, medicineDetails } = route.params;
-  console.log(medicineDetails, userID, "TESTING")
+  const { userID, medicineDetails, timings } = route.params;
   const [medicineName, setMedicineName] = useState(medicineDetails.medicineName);
 
-  let dateString = new Date().toISOString();
-  let formattedDate = dateString.slice(0, dateString.indexOf("T"));
+  let initialDate = new Date(medicineDetails.startDate);
 
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(initialDate);
   const [durationUnit, setDurationUnit] = useState("Days");
-  const [startDate, setStartDate] = useState(formattedDate);
-  const [endDate, setEndDate] = useState("2024-06-20");
+  const [startDate, setStartDate] = useState(medicineDetails.startDate);
+  const [endDate, setEndDate] = useState(medicineDetails.endDate);
   const [showDate, setShowDate] = useState(false);
   const [days, setDays] = useState({
     sunday: medicineDetails.sunday,
@@ -79,6 +77,7 @@ export default function EditMedicine({ navigation, route }) {
     }));
   };
 
+  // DATE PICKER
   const toggleShowDate = () => {
     setShowDate(!showDate);
   };
@@ -133,41 +132,55 @@ export default function EditMedicine({ navigation, route }) {
     return `${newHours}:${newMinutes}`;
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     calculateEndDate(date, `${selectedValue} + " " + ${durationUnit}`);
+    console.log("Hello")
+    console.log(medicineName, startDate, endDate,        
+      days.sunday ? 1 : 0,
+      days.monday ? 1 : 0,
+      days.tuesday ? 1 : 0,
+      days.wednesday ? 1 : 0,
+      days.thursday ? 1 : 0,
+      days.friday ? 1 : 0,
+      days.saturday ? 1 : 0,
+      timing.BeforeBreakfast ? subtractMinutes(timings[0].breakfast) : "",
+      timing.AfterBreakfast ? timings[0].breakfast: "",
+      timing.BeforeLunch ? subtractMinutes(timings[0].lunch) : "",
+      timing.AfterLunch ? timings[0].lunch : "",
+      timing.BeforeDinner ? subtractMinutes(timings[0].dinner) : "",
+      timing.AfterDinner ? timings[0].dinner : "")
 
-    console.log("medicineName")
+    db.transaction((tx) => {
+      tx.executeSql(
+        `UPDATE medicine_list  SET medicineName = ?, startDate = ?, endDate = ?, sunday = ?, monday = ?, tuesday = ?, wednesday = ?, thursday = ?, friday = ?, saturday = ?, BeforeBreakfast = ?, AfterBreakfast = ?, BeforeLunch = ?, AfterLunch = ?, BeforeDinner = ?, AfterDinner = ? WHERE id = ? AND user_id = ?`,
+        [
+          medicineName,
+          startDate,
+          endDate,
+          days.sunday ? 1 : 0,
+          days.monday ? 1 : 0,
+          days.tuesday ? 1 : 0,
+          days.wednesday ? 1 : 0,
+          days.thursday ? 1 : 0,
+          days.friday ? 1 : 0,
+          days.saturday ? 1 : 0,
+          timing.BeforeBreakfast ? subtractMinutes(timings[0].breakfast) : "",
+          timing.AfterBreakfast ? timings[0].breakfast: "",
+          timing.BeforeLunch ? subtractMinutes(timings[0].lunch) : "",
+          timing.AfterLunch ? timings[0].lunch : "",
+          timing.BeforeDinner ? subtractMinutes(timings[0].dinner) : "",
+          timing.AfterDinner ? timings[0].dinner : "",
+          medicineDetails.id,
+          userID,
+        ],
+        (txObj, resultSet) => {
+          Alert.alert("Medicine Updated")
+          navigation.navigate("Dashboard", {userID})
+        },
+        (txObj, error) => console.log(error)
+      );
 
-    // db.transaction((tx) => {
-    //   tx.executeSql(
-    //     `INSERT INTO medicine_list (medicineName, startDate, endDate, sunday, monday, tuesday, wednesday, thursday, friday, saturday, BeforeBreakfast, AfterBreakfast, BeforeLunch, AfterLunch, BeforeDinner, AfterDinner, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    //     [
-    //       medicineName,
-    //       startDate,
-    //       endDate,
-    //       days.sunday ? 1 : 0,
-    //       days.monday ? 1 : 0,
-    //       days.tuesday ? 1 : 0,
-    //       days.wednesday ? 1 : 0,
-    //       days.thursday ? 1 : 0,
-    //       days.friday ? 1 : 0,
-    //       days.saturday ? 1 : 0,
-    //       timing.BeforeBreakfast ? subtractMinutes(timings[0].breakfast) : "",
-    //       timing.AfterBreakfast ? timings[0].breakfast: "",
-    //       timing.BeforeLunch ? subtractMinutes(timings[0].lunch) : "",
-    //       timing.AfterLunch ? timings[0].lunch : "",
-    //       timing.BeforeDinner ? subtractMinutes(timings[0].dinner) : "",
-    //       timing.AfterDinner ? timings[0].dinner : "",
-    //       userID,
-    //     ],
-    //     (txObj, resultSet) => {
-    //       Alert.alert("Medicine Added")
-    //       navigation.navigate("Dashboard", {userID})
-    //     },
-    //     (txObj, error) => console.log(error)
-    //   );
-
-    // });
+    });
   };
   return (
     <ScrollView>
@@ -186,7 +199,7 @@ export default function EditMedicine({ navigation, route }) {
         {/* START DATE */}
         <View>
           <Text style={styles.textStyle}>
-            When did you start taking the medicine?
+            You started to take this medication on:
           </Text>
           <TouchableOpacity onPress={toggleShowDate}>
             <Text style={styles.textStyleSecondary}>{date.toDateString()}</Text>
@@ -198,6 +211,7 @@ export default function EditMedicine({ navigation, route }) {
               is24Hour={true}
               display="spinner"
               onChange={handleDate}
+              minimumDate={date}
             />
           )}
         </View>
@@ -205,7 +219,7 @@ export default function EditMedicine({ navigation, route }) {
         {/* DURATION OF MEDICATION */}
         <View>
           <Text style={styles.textStyle}>
-            How long will you be taking this medicine?
+            Do you want to change the duration?
           </Text>
           <View
             style={{
@@ -244,7 +258,7 @@ export default function EditMedicine({ navigation, route }) {
         </View>
 
         {/* MEDICATION SCHEDULE */}
-        <Text style={styles.textStyle}>How often do you need to take it?</Text>
+        <Text style={styles.textStyle}>Do you want to change your medication days?</Text>
         <View style={styles.radioAllBtnContainer}>
           <TouchableOpacity
             style={[
@@ -305,7 +319,7 @@ export default function EditMedicine({ navigation, route }) {
 
         {/* MEDICATION TIMINGS */}
         <Text style={styles.textStyle}>
-          At what time should you be taking the medicines?
+        Do you want to change your medication times?
         </Text>
         <View>
           {/* Breakfast */}
@@ -373,7 +387,7 @@ export default function EditMedicine({ navigation, route }) {
           </View>
         </View>
         <TouchableOpacity onPress={handleSave} style={styles.saveBtnContainer}>
-          <Text style={styles.saveBtn}>ADD MEDICINE +</Text>
+          <Text style={styles.saveBtn}>UPDATE MEDICINE</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

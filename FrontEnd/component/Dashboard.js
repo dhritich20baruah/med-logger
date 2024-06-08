@@ -72,7 +72,7 @@ const Dashboard = ({ navigation, route }) => {
             <FontAwesome name="user-doctor" size={50} color="#800000" />
             <Text style={styles.tileText}>Your Doctors</Text>
             <TouchableOpacity
-              onPress={() => navigation.navigate("Your Doctors")}
+              onPress={() => navigation.navigate("Your Doctors", {userID})}
             >
               <Text style={styles.tileButton}>SAVE & VIEW</Text>
             </TouchableOpacity>

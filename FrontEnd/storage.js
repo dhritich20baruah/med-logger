@@ -1,33 +1,57 @@
-import * as SQLite from 'expo-sqlite'
-import { useState } from 'react'
-import { Text, View } from 'react-native'
-import { NativeWindStyleSheet } from 'nativewind';
+import * as React from "react";
+import { useState, useEffect } from "react";
+import {
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Platform,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Pressable,
+  Button,
+} from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
-NativeWindStyleSheet.setOutput({
-    default: "native",
-  });
+export default function UpdateMedication({ route }) {
+    let {medStartDate} = route.params
 
-export default function Storage(){
-    const db = SQLite.openDatabase('example.db')
-    const [isLoading, setIsLoading] = useState(true)
+  const [date, setDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(medStartDate);
 
-    if(isLoading){
-        return(
-            <View className="flex-1 items-center justify-center">
-                <Text className="text-red-600">Loading...</Text>
-            </View>
-        )
-    }
+  // DATE PICKER
+  const toggleShowDate = () => {
+    setShowDate(!showDate);
+  };
+
+  const handleDate = (e, selectedDate) => {
+    const currentDate = selectedDate || date;
+    let dateString = selectedDate.toISOString();
+    let formattedDate = dateString.slice(0, dateString.indexOf("T"));
+
+    setDate(currentDate);
+    setStartDate(formattedDate);
+    toggleShowDate();
+  };
+
+  return (
+    <View>
+      <Text style={styles.textStyle}>
+        When did you start taking the medicine?
+      </Text>
+      <TouchableOpacity onPress={toggleShowDate}>
+        <Text style={styles.textStyleSecondary}>{date.toDateString()}</Text>
+      </TouchableOpacity>
+      {showDate && (
+        <DateTimePicker
+          value={date}
+          mode={"date"}
+          is24Hour={true}
+          display="spinner"
+          onChange={handleDate}
+        />
+      )}
+    </View>
+  );
 }
-
-
-export const handleSubmit = async (name, age, height, weight) => {
-    try {
-       console.log(name, age, height, weight)
-
-        alert('Data Saved')
-    } catch (error) {
-        console.error('Error saving data:', error);
-    }
-}
-
