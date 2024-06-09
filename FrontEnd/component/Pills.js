@@ -255,13 +255,7 @@ export default function Pills({ navigation, route }) {
         >
           <View style={styles.modalView}>
             <View
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "flex-end",
-                borderBottomWidth: 2,
-                borderBottomColor: "#800000",
-              }}
+              style={styles.modalBtns}
             >
               <TouchableOpacity style={{ margin: 10 }}>
                 <FontAwesome
@@ -527,6 +521,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+  },
+  modalBtns: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    borderBottomWidth: 2,
+    borderBottomColor: "#800000",
   },
   modalTitle: {
     margin: 5,

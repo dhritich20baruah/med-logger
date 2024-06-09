@@ -10,11 +10,12 @@ import {
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as SQLite from "expo-sqlite";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 const db = SQLite.openDatabase("med-logger2.db");
+import { useNavigation } from "@react-navigation/native";
 
 export default function AddDoctor({route}) {
-    const {userId} = route.params
+    const navigation = useNavigation()
+    const { userID, onGoBack } = route.params
     const [name, setName] = useState("");
     const [specialty, setSpecialty] = useState("");
     const [address, setAddress] = useState("");
@@ -23,15 +24,7 @@ export default function AddDoctor({route}) {
     const [nextVisit, setNextVisit] = useState(new Date());
     const [prescription, setPrescription] = useState("");
     const [showLastVisitedPicker, setShowLastVisitedPicker] = useState(false);
-    const [showNextVisitPicker, setShowNextVisitPicker] = useState(false);
-  
-    useState(() => {
-      db.transaction((tx) => {
-        tx.executeSql(
-          "CREATE TABLE IF NOT EXISTS doctors_Info (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, specialty TEXT, address TEXT, contactNumber TEXT, lastVisited TEXT, nextVisit TEXT, prescription TEXT, user_id INTEGER)"
-        );
-      });
-    }, []);
+    const [showNextVisitPicker, setShowNextVisitPicker] = useState(false); 
   
     const handleDateChange = (event, selectedDate, setDate) => {
       const currentDate = selectedDate || new Date();
@@ -45,22 +38,21 @@ export default function AddDoctor({route}) {
         Alert.alert("Validation Error", "Name and Specialty are required.");
         return false;
       }
-      if (contactNumber && !/^\d{10}$/.test(contactNumber)) {
-        Alert.alert("Validation Error", "Contact Number must be 10 digits.");
-        return false;
-      }
       return true;
     };
   
     const handleSubmit = () => {
+        console.log(name, specialty, address, contactNumber, lastVisited.toISOString(), nextVisit.toISOString(), prescription , userID)
       if (validateForm()) {
         db.transaction((tx) => {
           tx.executeSql(
             "INSERT INTO doctors_Info (name, specialty, address, contactNumber, lastVisited, nextVisit, prescription, user_id) values (?, ?, ?, ?, ?, ?, ?, ?)",
-            [name, specialty, address, contactNumber, lastVisited.toISOString(), nextVisit.toISOString(), prescription , userId],
+            [name, specialty, address, contactNumber, lastVisited.toISOString(), nextVisit.toISOString(), prescription , userID],
             (txObj, resultSet) => {
               Alert.alert("Success", "Doctor's information saved successfully!");
               clearForm();
+              onGoBack(); // Call the callback function
+              navigation.goBack(); // Navigate back to the previous screen
             },
             (txObj, error) => {
               console.log(error);
@@ -118,7 +110,7 @@ export default function AddDoctor({route}) {
         )}
         <TextInput
           style={[styles.input, { height: 100 }]}
-          placeholder="Prescription"
+          placeholder="Notes"
           value={prescription}
           onChangeText={setPrescription}
           multiline
