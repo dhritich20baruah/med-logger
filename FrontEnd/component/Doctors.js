@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   Modal,
   Share,
+  Alert,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import FontAwesome from "@expo/vector-icons/FontAwesome6";
@@ -43,7 +44,6 @@ export default function Doctors({ navigation, route }) {
         [userID],
         (txObj, resultSet) => {
           setDoctorList(resultSet.rows._array);
-          console.log(resultSet.rows._array);
         },
         (txObj, error) => console.log(error)
       );
@@ -88,26 +88,37 @@ export default function Doctors({ navigation, route }) {
     call(args).catch(console.error);
   };
 
-  // DELETE MEDICINE
-  const deleteInfo = (id) => {
+  //DELETE DOCTOR'S INFORMATION
+  const deleteInfo = (doctorId) => {
     db.transaction((tx) => {
       tx.executeSql(
-        "DELETE FROM doctors_Info WHERE id=?",
-        [id],
+        "DELETE FROM doctors_Info WHERE id = ?",
+        [doctorId],
         (txObj, resultSet) => {
-          Alert.alert("Doctors Information is removed");
-          // Update the state by filtering out the deleted medicine
-        //   setDoctorList((prevDoctorData) =>
-        //     prevDoctorData.filter((contact) => contact.id !== id)
-        //   );
-          // Close the modal
-          fetchDoctors()
-          setModalVisible(false);
+          Alert.alert("Success", "Doctor's information deleted successfully!");
+          fetchDoctors(); // Refresh the doctor list
+          setModalVisible(false); // Close the modal
         },
-        (txObj, error) => console.log(error)
+        (txObj, error) => {
+          console.log(error);
+          Alert.alert(
+            "Error",
+            "An error occurred while deleting the doctor's information."
+          );
+        }
       );
     });
   };
+
+  //EDIT DOCTOR'S INFORMATION
+  const editInfo = () => {
+    setModalVisible(false)
+    navigation.navigate("Edit Doctor Information", {
+      userID,
+      doctorsDetails
+    });
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View>
@@ -127,7 +138,6 @@ export default function Doctors({ navigation, route }) {
               <View style={{ marginHorizontal: 15 }}>
                 <Text style={{ fontSize: 20, fontWeight: "600" }}>
                   {item.name}
-                  {item.id}
                 </Text>
                 <Text style={{ fontSize: 15, fontWeight: "300" }}>
                   {item.specialty}
@@ -160,7 +170,10 @@ export default function Doctors({ navigation, route }) {
                           color="#800000"
                         />
                       </TouchableOpacity>
-                      <TouchableOpacity style={{ margin: 10 }}>
+                      <TouchableOpacity
+                        style={{ margin: 10 }}
+                        onPress={editInfo}
+                      >
                         <FontAwesome
                           name="pen-to-square"
                           size={25}
@@ -263,10 +276,7 @@ export default function Doctors({ navigation, route }) {
         </Modal>
         <TouchableOpacity
           onPress={() =>
-            navigation.navigate("Add Doctor Information", {
-              userID,
-              onGoBack: fetchDoctors,
-            })
+            navigation.navigate("Add Doctor Information", { userID })
           }
           style={styles.floatBtn}
         >

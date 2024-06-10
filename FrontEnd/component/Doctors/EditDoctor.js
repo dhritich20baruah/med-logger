@@ -13,17 +13,21 @@ import * as SQLite from "expo-sqlite";
 const db = SQLite.openDatabase("med-logger2.db");
 import { useNavigation } from "@react-navigation/native";
 
-export default function AddDoctor({ route }) {
+export default function EditDoctor({ route }) {
   const navigation = useNavigation();
-  const { userID } = route.params;
+  const { userID, doctorsDetails } = route.params;
   const [date, setDate] = useState(new Date());
-  const [name, setName] = useState("");
-  const [specialty, setSpecialty] = useState("");
-  const [address, setAddress] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
-  const [lastVisited, setLastVisited] = useState("");
-  const [nextVisit, setNextVisit] = useState("");
-  const [prescription, setPrescription] = useState("");
+  const [name, setName] = useState(doctorsDetails[0].name);
+  const [specialty, setSpecialty] = useState(doctorsDetails[0].specialty);
+  const [address, setAddress] = useState(doctorsDetails[0].address);
+  const [contactNumber, setContactNumber] = useState(
+    doctorsDetails[0].contactNumber
+  );
+  const [lastVisited, setLastVisited] = useState(doctorsDetails[0].lastVisited ? doctorsDetails[0].lastVisited : date);
+  const [nextVisit, setNextVisit] = useState(doctorsDetails[0].nextVisit ? doctorsDetails[0].nextVisit : date);
+  const [prescription, setPrescription] = useState(
+    doctorsDetails[0].prescription
+  );
   const [showLastVisitedPicker, setShowLastVisitedPicker] = useState(false);
   const [showNextVisitPicker, setShowNextVisitPicker] = useState(false);
 
@@ -54,33 +58,6 @@ export default function AddDoctor({ route }) {
       userID
     );
     if (validateForm()) {
-      db.transaction((tx) => {
-        tx.executeSql(
-          "INSERT INTO doctors_Info (name, specialty, address, contactNumber, lastVisited, nextVisit, prescription, user_id) values (?, ?, ?, ?, ?, ?, ?, ?)",
-          [
-            name,
-            specialty,
-            address,
-            contactNumber,
-            lastVisited.toISOString(),
-            nextVisit.toISOString(),
-            prescription,
-            userID,
-          ],
-          (txObj, resultSet) => {
-            Alert.alert("Success", "Doctor's information saved successfully!");
-            clearForm();
-            navigation.goBack(); // Navigate back to the previous screen
-          },
-          (txObj, error) => {
-            console.log(error);
-            Alert.alert(
-              "Error",
-              "An error occurred while saving the doctor's information."
-            );
-          }
-        );
-      });
     }
   };
 
@@ -96,7 +73,7 @@ export default function AddDoctor({ route }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Doctor's Information</Text>
+      <Text style={styles.title}>Edit Doctor's Information</Text>
       <TextInput
         style={styles.input}
         placeholder="Name"
@@ -127,11 +104,11 @@ export default function AddDoctor({ route }) {
         style={styles.input}
         onPress={() => setShowLastVisitedPicker(true)}
       >
-        <Text>{lastVisited}</Text>
+        <Text>{date.toDateString()}</Text>
       </TouchableOpacity>
       {showLastVisitedPicker && (
         <DateTimePicker
-          value={date}
+          value={lastVisited}
           mode="date"
           display="default"
           onChange={(event, selectedDate) =>
@@ -139,10 +116,7 @@ export default function AddDoctor({ route }) {
           }
         />
       )}
-      <Text style={styles.textStyle}>
-        Your next visit should be on &#40; You will be reminded a day before
-        this date &#41;:
-      </Text>
+      <Text style={styles.textStyle}>Your next visit should be on &#40; You will be reminded a day before this date &#41;:</Text>
       <TouchableOpacity
         style={styles.input}
         onPress={() => setShowNextVisitPicker(true)}
@@ -209,6 +183,6 @@ const styles = StyleSheet.create({
   textStyle: {
     fontSize: 16,
     marginVertical: 10,
-    fontWeight: "500",
-  },
+    fontWeight: '500'
+  }
 });

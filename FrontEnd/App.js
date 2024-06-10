@@ -23,6 +23,7 @@ import CalendarScreen from "./component/CalendarScreen";
 import AddMedicine from "./component/PillTracker/AddMedicine";
 import EditMedicine from "./component/PillTracker/EditMedicine";
 import AddDoctor from "./component/Doctors/AddDoctor";
+import EditDoctor from "./component/Doctors/EditDoctor";
 
 function HomeScreen({ navigation, route }) {
   const [name, setName] = useState("");
@@ -433,6 +434,15 @@ export default function App() {
          <Stack.Screen
           name="Add Doctor Information"
           component={AddDoctor}
+          options={() => ({
+            headerStyle: {
+              backgroundColor: "#800000",
+            },
+          })}
+        />
+         <Stack.Screen
+          name="Edit Doctor Information"
+          component={EditDoctor}
           options={() => ({
             headerStyle: {
               backgroundColor: "#800000",
