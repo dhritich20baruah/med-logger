@@ -7,9 +7,11 @@ import {
   ScrollView,
   SafeAreaView,
   Modal,
+  Share,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import FontAwesome from "@expo/vector-icons/FontAwesome6";
+import call from "react-native-phone-call";
 import * as SQLite from "expo-sqlite";
 
 const db = SQLite.openDatabase("med-logger2.db");
@@ -50,14 +52,12 @@ export default function Doctors({ navigation, route }) {
 
   // MODAL FUNCTION
   const doctorInfo = (id) => {
-    console.log(id);
     db.transaction((tx) => {
       tx.executeSql(
         "SELECT * FROM doctors_Info WHERE id = ? AND user_id = ?",
         [id, userID],
         (txObj, resultSet) => {
-          console.log(resultSet.rows._array);
-          setDoctorsDetails(resultSet.rows._array)
+          setDoctorsDetails(resultSet.rows._array);
           setModalVisible(true);
         },
         (txObj, error) => console.log("Error fetching doctor's details:", error)
@@ -65,6 +65,49 @@ export default function Doctors({ navigation, route }) {
     });
   };
 
+  //SHARE DETAILS
+  const shareDoctorDetails = (name, specialty, contactNumber, address) => {
+    const message = `
+    Doctor's Name: ${name}
+    Specialty: ${specialty}
+    Contact Number: ${contactNumber}
+    Address: ${address}`;
+
+    Share.share({
+      message,
+    }).catch((error) => console.log(error));
+  };
+
+  //CALL
+  const triggerCall = (phoneNo) => {
+    const args = {
+      number: phoneNo, // String value with the number to call
+      prompt: true, // Boolean value to prompt the user or not, default: true
+    };
+
+    call(args).catch(console.error);
+  };
+
+  // DELETE MEDICINE
+  const deleteInfo = (id) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "DELETE FROM doctors_Info WHERE id=?",
+        [id],
+        (txObj, resultSet) => {
+          Alert.alert("Doctors Information is removed");
+          // Update the state by filtering out the deleted medicine
+        //   setDoctorList((prevDoctorData) =>
+        //     prevDoctorData.filter((contact) => contact.id !== id)
+        //   );
+          // Close the modal
+          fetchDoctors()
+          setModalVisible(false);
+        },
+        (txObj, error) => console.log(error)
+      );
+    });
+  };
   return (
     <SafeAreaView style={styles.container}>
       <View>
@@ -102,32 +145,120 @@ export default function Doctors({ navigation, route }) {
           }}
         >
           <View style={styles.modalView}>
-            <View style={styles.modalBtns}>
-              <TouchableOpacity style={{ margin: 10 }}>
-                <FontAwesome name="trash-can" size={25} color="#800000" />
-              </TouchableOpacity>
-              <TouchableOpacity style={{ margin: 10 }}>
-                <FontAwesome name="pen-to-square" size={25} color="#800000" />
-              </TouchableOpacity>
-            </View>
             <View>
               {doctorsDetails.map((item) => {
                 return (
                   <View key={item.id} style={{}}>
-                    <Text style={{textAlign: 'center', fontSize: 20, fontWeight: "600"}}>{item.name}</Text>
-                    <Text>{item.specialty}</Text>
-                    <Text>{item.contactNumber}</Text>
-                    <Text>{item.address}</Text>
+                    <View style={styles.modalBtns}>
+                      <TouchableOpacity
+                        style={{ margin: 10 }}
+                        onPress={() => deleteInfo(item.id)}
+                      >
+                        <FontAwesome
+                          name="trash-can"
+                          size={25}
+                          color="#800000"
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity style={{ margin: 10 }}>
+                        <FontAwesome
+                          name="pen-to-square"
+                          size={25}
+                          color="#800000"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    <Text
+                      style={{
+                        textAlign: "center",
+                        fontSize: 20,
+                        fontWeight: "600",
+                        color: "#800000",
+                      }}
+                    >
+                      {item.name}
+                    </Text>
+                    <Text
+                      style={{
+                        textAlign: "center",
+                        fontSize: 16,
+                        fontWeight: "400",
+                        color: "#800000",
+                      }}
+                    >
+                      {item.specialty}
+                    </Text>
+                    <Text
+                      style={{
+                        textAlign: "center",
+                        fontSize: 16,
+                        fontWeight: "400",
+                        color: "#800000",
+                      }}
+                    >
+                      {item.contactNumber}
+                    </Text>
+                    <Text
+                      style={{
+                        textAlign: "center",
+                        fontSize: 16,
+                        fontWeight: "400",
+                        color: "#800000",
+                      }}
+                    >
+                      {item.address}
+                    </Text>
+                    <Text
+                      style={{
+                        textAlign: "center",
+                        fontSize: 16,
+                        fontWeight: "400",
+                        color: "#800000",
+                      }}
+                    >
+                      {item.prescription}
+                    </Text>
+                    <View
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "space-evenly",
+                        marginVertical: 20,
+                      }}
+                    >
+                      <TouchableOpacity
+                        onPress={() => triggerCall(item.contactNumber)}
+                      >
+                        <FontAwesome
+                          name="square-phone"
+                          size={40}
+                          color="#800000"
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() =>
+                          shareDoctorDetails(
+                            item.name,
+                            item.specialty,
+                            item.contactNumber,
+                            item.address
+                          )
+                        }
+                      >
+                        <FontAwesome
+                          name="share-nodes"
+                          size={40}
+                          color="#800000"
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => setModalVisible(false)}>
+                        <FontAwesome name="xmark" size={40} color="#800000" />
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 );
               })}
             </View>
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              style={styles.saveBtnContainer}
-            >
-              <Text style={styles.saveBtn}>CLOSE</Text>
-            </TouchableOpacity>
           </View>
         </Modal>
         <TouchableOpacity
@@ -210,16 +341,5 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     padding: 3,
-  },
-  saveBtnContainer: {
-    margin: 10,
-    padding: 10,
-    borderRadius: 50,
-    backgroundColor: "orange",
-  },
-  saveBtn: {
-    color: "white",
-    textAlign: "center",
-    fontWeight: "bold",
   },
 });

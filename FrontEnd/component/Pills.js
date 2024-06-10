@@ -220,6 +220,7 @@ export default function Pills({ navigation, route }) {
     });
   };
 
+  //EDIT MEDICATION
   const EditMedicine = () => {
     setModalVisible(false)
     navigation.navigate("Edit Medication", {
