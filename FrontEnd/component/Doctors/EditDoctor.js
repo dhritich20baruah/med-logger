@@ -23,19 +23,34 @@ export default function EditDoctor({ route }) {
   const [contactNumber, setContactNumber] = useState(
     doctorsDetails[0].contactNumber
   );
-  const [lastVisited, setLastVisited] = useState(doctorsDetails[0].lastVisited ? doctorsDetails[0].lastVisited : date);
-  const [nextVisit, setNextVisit] = useState(doctorsDetails[0].nextVisit ? doctorsDetails[0].nextVisit : date);
+  const [lastVisited, setLastVisited] = useState(doctorsDetails[0].lastVisited);
+  const [nextVisit, setNextVisit] = useState(doctorsDetails[0].nextVisit);
   const [prescription, setPrescription] = useState(
     doctorsDetails[0].prescription
   );
   const [showLastVisitedPicker, setShowLastVisitedPicker] = useState(false);
   const [showNextVisitPicker, setShowNextVisitPicker] = useState(false);
 
-  const handleDateChange = (event, selectedDate, setDate) => {
-    const currentDate = selectedDate || new Date();
-    setShowLastVisitedPicker(false);
-    setShowNextVisitPicker(false);
-    setDate(currentDate);
+  const handleDate = (e, selectedDate) => {
+    if (selectedDate) {
+      const currentDate = selectedDate || date;
+      let dateString = selectedDate.toISOString();
+      let formattedDate = dateString.slice(0, dateString.indexOf("T"));
+      setDate(currentDate);
+      setLastVisited(formattedDate);
+      setShowLastVisitedPicker(false);
+    }
+  };
+
+  const handleNextDate = (e, selectedDate) => {
+    if (selectedDate) {
+      const currentDate = selectedDate || date;
+      let dateString = selectedDate.toISOString();
+      let formattedDate = dateString.slice(0, dateString.indexOf("T"));
+      setDate(currentDate);
+      setNextVisit(formattedDate);
+      setShowNextVisitPicker(false);
+    }
   };
 
   const validateForm = () => {
@@ -47,28 +62,35 @@ export default function EditDoctor({ route }) {
   };
 
   const handleSubmit = () => {
-    console.log(
-      name,
-      specialty,
-      address,
-      contactNumber,
-      lastVisited.toISOString(),
-      nextVisit.toISOString(),
-      prescription,
-      userID
-    );
     if (validateForm()) {
+      db.transaction((tx) => {
+        tx.executeSql(
+          "UPDATE doctors_Info SET name = ?, specialty = ?, address = ?, contactNumber = ?, lastVisited = ?, nextVisit = ?, prescription = ? WHERE user_id = ? AND id = ?",
+          [
+            name,
+            specialty,
+            address,
+            contactNumber,
+            lastVisited,
+            nextVisit,
+            prescription,
+            userID,
+            doctorsDetails[0].id
+          ],
+          (txObj, resultSet) => {
+            Alert.alert("Success", "Doctor's information updated successfully!");
+            navigation.goBack(); // Navigate back to the previous screen
+          },
+          (txObj, error) => {
+            console.log("Insert Error:", error);
+            Alert.alert(
+              "Error",
+              "An error occurred while saving the doctor's information."
+            );
+          }
+        );
+      });
     }
-  };
-
-  const clearForm = () => {
-    setName("");
-    setSpecialty("");
-    setAddress("");
-    setContactNumber("");
-    setLastVisited(new Date());
-    setNextVisit(new Date());
-    setPrescription("");
   };
 
   return (
@@ -104,16 +126,14 @@ export default function EditDoctor({ route }) {
         style={styles.input}
         onPress={() => setShowLastVisitedPicker(true)}
       >
-        <Text>{date.toDateString()}</Text>
+        <Text>{lastVisited}</Text>
       </TouchableOpacity>
       {showLastVisitedPicker && (
         <DateTimePicker
-          value={lastVisited}
+          value={date}
           mode="date"
           display="default"
-          onChange={(event, selectedDate) =>
-            handleDateChange(event, selectedDate, setLastVisited)
-          }
+          onChange={handleDate}
         />
       )}
       <Text style={styles.textStyle}>Your next visit should be on &#40; You will be reminded a day before this date &#41;:</Text>
@@ -121,16 +141,14 @@ export default function EditDoctor({ route }) {
         style={styles.input}
         onPress={() => setShowNextVisitPicker(true)}
       >
-        <Text>{date.toDateString()}</Text>
+        <Text>{nextVisit}</Text>
       </TouchableOpacity>
       {showNextVisitPicker && (
         <DateTimePicker
           value={date}
           mode="date"
           display="default"
-          onChange={(event, selectedDate) =>
-            handleDateChange(event, selectedDate, setNextVisit)
-          }
+          onChange={handleNextDate}
         />
       )}
       <TextInput

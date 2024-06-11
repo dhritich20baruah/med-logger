@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
+  SafeAreaView,
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -131,7 +132,7 @@ function HomeScreen({ navigation, route }) {
 
   return (
     <ScrollView>
-      <View style={{ flex: 1, padding: 20 }}>
+      <View style={{ flex: 1, padding: 20, backgroundColor: "white" }}>
         <Text style={{ textAlign: "center", color: "#800000", fontSize: 20 }}>
           ADD NEW USER
         </Text>
@@ -265,7 +266,7 @@ function HomeScreen({ navigation, route }) {
           onPress={handleSubmit}
           style={{ backgroundColor: "orange", padding: 10, borderRadius: 5 }}
         >
-          <Text style={{ color: "white", textAlign: "center" }}>Submit</Text>
+          <Text style={{ color: "white", textAlign: "center", fontSize: 15, fontWeight: '800' }}>SUBMIT</Text>
         </TouchableOpacity>
 
         <Text
@@ -289,13 +290,13 @@ function HomeScreen({ navigation, route }) {
                 >
                   <Text
                     style={{
-                      color: "white",
+                      color: "#800000",
                       margin: 5,
                       padding: 5,
                       textAlign: "center",
-                      backgroundColor: "#800000",
+                      backgroundColor: "white",
                       fontSize: 20,
-                      elevation: 5,
+                      elevation:15
                     }}
                   >
                     {item.name}

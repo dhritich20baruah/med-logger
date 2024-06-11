@@ -44,6 +44,7 @@ export default function Doctors({ navigation, route }) {
         [userID],
         (txObj, resultSet) => {
           setDoctorList(resultSet.rows._array);
+          // console.log(resultSet.rows._array)
         },
         (txObj, error) => console.log(error)
       );

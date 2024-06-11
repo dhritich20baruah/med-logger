@@ -27,27 +27,7 @@ const Dashboard = ({ navigation, route }) => {
     <View>
       <Text style={{color: "#800000", fontSize: 20, textAlign: "center", fontWeight: "bold"}}>Hello, {users[0].name}</Text>
       <View style={styles.container}>
-        <View style={styles.row}>
-          <View style={styles.cell}>
-            <FontAwesome name="heart-pulse" size={50} color="#800000" />
-            <Text style={styles.tileText}>Blood Pressure</Text>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Blood Pressure", {userID})}
-            >
-              <Text style={styles.tileButton}>RECORD</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.cell}>
-            <FontAwesome name="droplet" size={50} color="#800000" />
-            <Text style={styles.tileText}>Blood Sugar</Text>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Blood Sugar", {userID})}
-            >
-              <Text style={styles.tileButton}>RECORD</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View style={styles.row}>
+      <View style={styles.row}>
           <View style={styles.cell}>
             <FontAwesome name="x-ray" size={50} color="#800000" />
             <Text style={styles.tileText}>Diagnostic Reports</Text>
@@ -69,6 +49,27 @@ const Dashboard = ({ navigation, route }) => {
         </View>
         <View style={styles.row}>
           <View style={styles.cell}>
+            <FontAwesome name="heart-pulse" size={50} color="#800000" />
+            <Text style={styles.tileText}>Blood Pressure</Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Blood Pressure", {userID})}
+            >
+              <Text style={styles.tileButton}>RECORD</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.cell}>
+            <FontAwesome name="droplet" size={50} color="#800000" />
+            <Text style={styles.tileText}>Blood Sugar</Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Blood Sugar", {userID})}
+            >
+              <Text style={styles.tileButton}>RECORD</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        
+        <View style={styles.row}>
+          <View style={styles.cell}>
             <FontAwesome name="user-doctor" size={50} color="#800000" />
             <Text style={styles.tileText}>Your Doctors</Text>
             <TouchableOpacity
@@ -80,7 +81,7 @@ const Dashboard = ({ navigation, route }) => {
           <View style={styles.cell}>
             <FontAwesome name="calendar-days" size={50} color="#800000" />
             <Text style={styles.tileText}>History</Text>
-            <TouchableOpacity onPress={() => navigation.navigate("History")}>
+            <TouchableOpacity onPress={() => navigation.navigate("History", {userID})}>
               <Text style={styles.tileButton}>VIEW</Text>
             </TouchableOpacity>
           </View>

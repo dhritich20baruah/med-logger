@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,8 +10,9 @@ import {
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as SQLite from "expo-sqlite";
-const db = SQLite.openDatabase("med-logger2.db");
 import { useNavigation } from "@react-navigation/native";
+
+const db = SQLite.openDatabase("med-logger2.db");
 
 export default function AddDoctor({ route }) {
   const navigation = useNavigation();
@@ -27,11 +28,26 @@ export default function AddDoctor({ route }) {
   const [showLastVisitedPicker, setShowLastVisitedPicker] = useState(false);
   const [showNextVisitPicker, setShowNextVisitPicker] = useState(false);
 
-  const handleDateChange = (event, selectedDate, setDate) => {
-    const currentDate = selectedDate || new Date();
-    setShowLastVisitedPicker(false);
-    setShowNextVisitPicker(false);
-    setDate(currentDate);
+  const handleDate = (e, selectedDate) => {
+    if (selectedDate) {
+      const currentDate = selectedDate || date;
+      let dateString = selectedDate.toISOString();
+      let formattedDate = dateString.slice(0, dateString.indexOf("T"));
+      setDate(currentDate);
+      setLastVisited(formattedDate);
+      setShowLastVisitedPicker(false);
+    }
+  };
+
+  const handleNextDate = (e, selectedDate) => {
+    if (selectedDate) {
+      const currentDate = selectedDate || date;
+      let dateString = selectedDate.toISOString();
+      let formattedDate = dateString.slice(0, dateString.indexOf("T"));
+      setDate(currentDate);
+      setNextVisit(formattedDate);
+      setShowNextVisitPicker(false);
+    }
   };
 
   const validateForm = () => {
@@ -43,16 +59,6 @@ export default function AddDoctor({ route }) {
   };
 
   const handleSubmit = () => {
-    console.log(
-      name,
-      specialty,
-      address,
-      contactNumber,
-      lastVisited.toISOString(),
-      nextVisit.toISOString(),
-      prescription,
-      userID
-    );
     if (validateForm()) {
       db.transaction((tx) => {
         tx.executeSql(
@@ -62,8 +68,8 @@ export default function AddDoctor({ route }) {
             specialty,
             address,
             contactNumber,
-            lastVisited.toISOString(),
-            nextVisit.toISOString(),
+            lastVisited,
+            nextVisit,
             prescription,
             userID,
           ],
@@ -73,7 +79,7 @@ export default function AddDoctor({ route }) {
             navigation.goBack(); // Navigate back to the previous screen
           },
           (txObj, error) => {
-            console.log(error);
+            console.log("Insert Error:", error);
             Alert.alert(
               "Error",
               "An error occurred while saving the doctor's information."
@@ -89,8 +95,8 @@ export default function AddDoctor({ route }) {
     setSpecialty("");
     setAddress("");
     setContactNumber("");
-    setLastVisited(new Date());
-    setNextVisit(new Date());
+    setLastVisited("");
+    setNextVisit("");
     setPrescription("");
   };
 
@@ -127,16 +133,14 @@ export default function AddDoctor({ route }) {
         style={styles.input}
         onPress={() => setShowLastVisitedPicker(true)}
       >
-        <Text>{lastVisited}</Text>
+        <Text>{lastVisited || "Select Date"}</Text>
       </TouchableOpacity>
       {showLastVisitedPicker && (
         <DateTimePicker
           value={date}
           mode="date"
           display="default"
-          onChange={(event, selectedDate) =>
-            handleDateChange(event, selectedDate, setLastVisited)
-          }
+          onChange={handleDate}
         />
       )}
       <Text style={styles.textStyle}>
@@ -147,16 +151,14 @@ export default function AddDoctor({ route }) {
         style={styles.input}
         onPress={() => setShowNextVisitPicker(true)}
       >
-        <Text>{date.toDateString()}</Text>
+        <Text>{nextVisit || "Select Date"}</Text>
       </TouchableOpacity>
       {showNextVisitPicker && (
         <DateTimePicker
           value={date}
           mode="date"
           display="default"
-          onChange={(event, selectedDate) =>
-            handleDateChange(event, selectedDate, setNextVisit)
-          }
+          onChange={handleNextDate}
         />
       )}
       <TextInput
