@@ -14,7 +14,7 @@ import { shareAsync } from "expo-sharing";
 import { useNavigation } from '@react-navigation/native';
 
 export default function Display({ route }) {
-  const { uri, imageId } = route.params;
+  const { uri, imageId, doctor, notes } = route.params;
   console.log(imageId)
   const [permission, setPermission] = useState(null);
 
@@ -80,6 +80,8 @@ export default function Display({ route }) {
   return (
     <View style={styles.container}>
       <Image source={{ uri }} style={styles.image} />
+      <Text>{doctor}</Text>
+      <Text>{notes}</Text>
       <View style={{ display: "flex", flexDirection: "row" }}>
         <TouchableOpacity style={{ margin: 20, padding: 10, elevation: 18 }} onPress={handleDelete}>
         <FontAwesome name="trash-can" size={30} color="#800000" />

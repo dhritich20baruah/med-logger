@@ -19,12 +19,13 @@ import Diagnostic from "./component/Diagnostics";
 import Pills from "./component/Pills";
 import Doctors from "./component/Doctors";
 import History from "./component/History";
-import Display from "./component/Display";
+import Display from "./component/Diagnotics/Display";
 import CalendarScreen from "./component/CalendarScreen";
 import AddMedicine from "./component/PillTracker/AddMedicine";
 import EditMedicine from "./component/PillTracker/EditMedicine";
 import AddDoctor from "./component/Doctors/AddDoctor";
 import EditDoctor from "./component/Doctors/EditDoctor";
+import CameraFunction from "./component/Diagnotics/CameraFunction";
 
 function HomeScreen({ navigation, route }) {
   const [name, setName] = useState("");
@@ -372,6 +373,15 @@ export default function App() {
         <Stack.Screen
           name="Diagnostic Reports"
           component={Diagnostic}
+          options={() => ({
+            headerStyle: {
+              backgroundColor: "#800000",
+            },
+          })}
+        />
+         <Stack.Screen
+          name="Camera"
+          component={CameraFunction}
           options={() => ({
             headerStyle: {
               backgroundColor: "#800000",
