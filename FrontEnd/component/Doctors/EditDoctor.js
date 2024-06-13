@@ -126,7 +126,7 @@ export default function EditDoctor({ route }) {
         style={styles.input}
         onPress={() => setShowLastVisitedPicker(true)}
       >
-        <Text>{lastVisited}</Text>
+        <Text>{lastVisited.split("-").reverse().join("-")}</Text>
       </TouchableOpacity>
       {showLastVisitedPicker && (
         <DateTimePicker
@@ -141,7 +141,7 @@ export default function EditDoctor({ route }) {
         style={styles.input}
         onPress={() => setShowNextVisitPicker(true)}
       >
-        <Text>{nextVisit}</Text>
+        <Text>{nextVisit.split("-").reverse().join("-")}</Text>
       </TouchableOpacity>
       {showNextVisitPicker && (
         <DateTimePicker

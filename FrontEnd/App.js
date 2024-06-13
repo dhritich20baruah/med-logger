@@ -26,6 +26,7 @@ import EditMedicine from "./component/PillTracker/EditMedicine";
 import AddDoctor from "./component/Doctors/AddDoctor";
 import EditDoctor from "./component/Doctors/EditDoctor";
 import CameraFunction from "./component/Diagnotics/CameraFunction";
+import DailyActivity from "./component/History/DailyActivity";
 
 function HomeScreen({ navigation, route }) {
   const [name, setName] = useState("");
@@ -463,6 +464,15 @@ export default function App() {
         <Stack.Screen
           name="History"
           component={History}
+          options={() => ({
+            headerStyle: {
+              backgroundColor: "#800000",
+            },
+          })}
+        />
+         <Stack.Screen
+          name="Day's Activity"
+          component={DailyActivity}
           options={() => ({
             headerStyle: {
               backgroundColor: "#800000",

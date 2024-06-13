@@ -14,6 +14,7 @@ import * as SQLite from "expo-sqlite";
 import { shareAsync } from "expo-sharing";
 import { useNavigation } from '@react-navigation/native';
 
+
 export default function Display({ route }) {
   const { uri, imageId, doctor, notes } = route.params;
   const [permission, setPermission] = useState(null);
@@ -73,7 +74,6 @@ export default function Display({ route }) {
       Alert.alert("Error", "Failed to delete image");
     }
   };
-
   const handleShare = () => {
     shareAsync(uri)
   }

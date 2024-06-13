@@ -80,7 +80,7 @@ const Diagnostics = ({ navigation, route }) => {
     <View style={styles.container}>
       <TextInput
         style={styles.searchBar}
-        placeholder="Search by doctor or notes"
+        placeholder="Search by Doctor's name or notes"
         value={searchQuery}
         onChangeText={setSearchQuery}
       />
