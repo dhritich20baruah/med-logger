@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
+  TextInput,
 } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome6";
 import * as MediaLibrary from "expo-media-library";
@@ -14,15 +15,15 @@ import { useFocusEffect } from "@react-navigation/native";
 
 const Diagnostics = ({ navigation, route }) => {
   const { userID } = route.params;
-  const [hasMediaLibraryPermission, setHasMediaLibraryPermission] =
-    useState(null);
+  const [hasMediaLibraryPermission, setHasMediaLibraryPermission] = useState(null);
   const [photos, setPhotos] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredPhotos, setFilteredPhotos] = useState([]);
 
   const toggleCamera = () => {
     navigation.navigate("Camera", { userID });
   };
 
-  //DATABASE
   const db = SQLite.openDatabase("med-logger2.db");
 
   useFocusEffect(
@@ -47,15 +48,25 @@ const Diagnostics = ({ navigation, route }) => {
   const fetchImages = () => {
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM diagnosticReports WHERE user_id = ?",
+        "SELECT * FROM diagnosticReports WHERE user_id = ? ORDER BY id DESC",
         [userID],
         (txObj, resultSet) => {
           setPhotos(resultSet.rows._array);
+          setFilteredPhotos(resultSet.rows._array);
         },
         (txObj, error) => console.log(error)
       );
     });
-  }
+  };
+
+  useEffect(() => {
+    const lowercasedQuery = searchQuery.toLowerCase();
+    const filteredData = photos.filter(photo =>
+      photo.doctor.toLowerCase().includes(lowercasedQuery) ||
+      photo.notes.toLowerCase().includes(lowercasedQuery)
+    );
+    setFilteredPhotos(filteredData);
+  }, [searchQuery, photos]);
 
   if (hasMediaLibraryPermission === false) {
     return (
@@ -67,9 +78,15 @@ const Diagnostics = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
+      <TextInput
+        style={styles.searchBar}
+        placeholder="Search by doctor or notes"
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
       <FlatList
-        data={photos}
-        keyExtractor={(item) => item.id}
+        data={filteredPhotos}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
             onPress={() =>
@@ -89,14 +106,6 @@ const Diagnostics = ({ navigation, route }) => {
           style={styles.btnText}
         />
       </TouchableOpacity>
-      <TouchableOpacity onPress={toggleCamera} style={styles.floatBtnGallery}>
-      <FontAwesome
-            name="images"
-            size={50}
-            color="white"
-            style={styles.btnText}
-          />
-      </TouchableOpacity>
     </View>
   );
 };
@@ -110,39 +119,34 @@ const styles = StyleSheet.create({
     alignItems: "center",
     margin: 10,
   },
+  searchBar: {
+    width: '100%',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#800000',
+    borderRadius: 5,
+    marginBottom: 10,
+  },
   photo: {
     width: 115,
     height: 115,
     margin: 1,
   },
   floatBtn: {
-    flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#800000",
     position: "absolute",
     borderRadius: 10,
-    top: 580,
+    bottom: 30,
     right: 30,
-    padding: 3,
+    padding: 10,
     elevation: 15,
   },
   btnText: {
     color: "white",
     fontSize: 30,
     padding: 3,
-  },
-  floatBtnGallery: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#800000",
-    position: "absolute",
-    borderRadius: 10,
-    top: 650,
-    right: 30,
-    padding: 3,
-    elevation: 15,
   },
 });
 

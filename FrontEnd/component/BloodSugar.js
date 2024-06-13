@@ -37,11 +37,6 @@ export default function BloodSugar({ route }) {
   useEffect(() => {
     db.transaction((tx) => {
       tx.executeSql(
-        "CREATE TABLE IF NOT EXISTS blood_sugar (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, test_type text, sugar_value INTEGER, user_id INTEGER)"
-      );
-    });
-    db.transaction((tx) => {
-      tx.executeSql(
         "SELECT * FROM blood_sugar WHERE user_id = ?",
         [userID],
         (txObj, resultSet) => {
@@ -188,27 +183,33 @@ export default function BloodSugar({ route }) {
             <View style={styles.recordItem}>
               <Text style={styles.label}>Fasting</Text>
               <Text style={styles.value}>
-                {mgDL
+              {mgDL && fasting.length > 0
                   ? fasting[fasting.length - 1].sugarValue
-                  : fasting[fasting.length - 1].sugarValue * 0.05}
+                  : fasting.length > 0
+                  ? fasting[fasting.length - 1].sugarValue * 0.05
+                  : "N/A"}
               </Text>
               <Text style={styles.unit}>{!mgDL ? "(mmol/L)" : "(mg/dL)"}</Text>
             </View>
             <View style={styles.recordItem}>
               <Text style={styles.label}>Postprandial (PP)</Text>
               <Text style={styles.value}>
-                {mgDL
+              {mgDL && postprandial.length > 0
                   ? postprandial[postprandial.length - 1].sugarValue
-                  : postprandial[postprandial.length - 1].sugarValue * 0.05}
+                  : postprandial.length > 0
+                  ? postprandial[postprandial.length - 1].sugarValue * 0.05
+                  : "N/A"}
               </Text>
               <Text style={styles.unit}>{!mgDL ? "(mmol/L)" : "(mg/dL)"}</Text>
             </View>
             <View style={styles.recordItem}>
               <Text style={styles.label}>Random</Text>
               <Text style={styles.value}>
-                {mgDL
+              {mgDL && random.length > 0
                   ? random[random.length - 1].sugarValue
-                  : random[random.length - 1].sugarValue * 0.05}
+                  : random.length > 0
+                  ? random[random.length - 1].sugarValue * 0.05
+                  : "N/A"}
               </Text>
               <Text style={styles.unit}>{!mgDL ? "(mmol/L)" : "(mg/dL)"}</Text>
             </View>

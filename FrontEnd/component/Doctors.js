@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Text,
   View,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   SafeAreaView,
   Modal,
   Share,
@@ -22,14 +21,6 @@ export default function Doctors({ navigation, route }) {
   const [doctorList, setDoctorList] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [doctorsDetails, setDoctorsDetails] = useState([]);
-
-  useEffect(() => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        "CREATE TABLE IF NOT EXISTS doctors_Info (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, specialty TEXT, address TEXT, contactNumber TEXT, lastVisited TEXT, nextVisit TEXT, prescription TEXT, user_id INTEGER)"
-      );
-    });
-  }, []);
 
   useFocusEffect(
     useCallback(() => {

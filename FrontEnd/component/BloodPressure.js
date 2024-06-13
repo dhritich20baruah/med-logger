@@ -29,13 +29,7 @@ export default function BloodPressure({ navigation, route }) {
   const db = SQLite.openDatabase("med-logger2.db");
 
   useEffect(() => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        "CREATE TABLE IF NOT EXISTS blood_pressure (id INTEGER PRIMARY KEY AUTOINCREMENT, systolic INTEGER, diastolic INTEGER, pulse INTEGER, user_id INTEGER, date TEXT)"
-      );
-    });
-
-    db.transaction((tx) => {
+     db.transaction((tx) => {
       tx.executeSql(
         "SELECT * FROM blood_pressure WHERE user_id = ?",
         [userID],

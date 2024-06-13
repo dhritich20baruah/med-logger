@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Alert,
   TouchableOpacity,
+  SafeAreaView
 } from "react-native";
 import { useState, useEffect } from "react";
 import * as MediaLibrary from "expo-media-library";
@@ -15,7 +16,6 @@ import { useNavigation } from '@react-navigation/native';
 
 export default function Display({ route }) {
   const { uri, imageId, doctor, notes } = route.params;
-  console.log(imageId)
   const [permission, setPermission] = useState(null);
 
   const navigation = useNavigation();
@@ -78,10 +78,10 @@ export default function Display({ route }) {
     shareAsync(uri)
   }
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Image source={{ uri }} style={styles.image} />
-      <Text>{doctor}</Text>
-      <Text>{notes}</Text>
+      <Text style={styles.imageText}>Advised by: {doctor}</Text>
+      <Text style={styles.imageText}>Notes: {notes}</Text>
       <View style={{ display: "flex", flexDirection: "row" }}>
         <TouchableOpacity style={{ margin: 20, padding: 10, elevation: 18 }} onPress={handleDelete}>
         <FontAwesome name="trash-can" size={30} color="#800000" />
@@ -90,13 +90,13 @@ export default function Display({ route }) {
         <FontAwesome name="share-nodes" size={30} color="#800000" />
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    display: 'flex',
     justifyContent: "center",
     alignItems: "center",
   },
@@ -105,8 +105,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   image: {
-    width: 350,
-    height: 350,
-    margin: 1,
+    width: '95%',
+    height: '80%',
+    margin: 10,
+    objectFit: 'contain'
   },
+  imageText: {
+    fontSize: 15
+  }
 });

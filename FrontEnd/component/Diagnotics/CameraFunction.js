@@ -90,7 +90,7 @@ export default function CameraFunction({ route }) {
         <View>
           <TextInput
             style={styles.input}
-            placeholder="Prescribed by"
+            placeholder="Advised by"
             value={doctor}
             onChangeText={setDoctor}
           />

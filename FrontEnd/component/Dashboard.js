@@ -9,7 +9,6 @@ const Dashboard = ({ navigation, route }) => {
 
   //DATABASE
   const db = SQLite.openDatabase("med-logger2.db");
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     db.transaction((tx) => {
@@ -20,7 +19,48 @@ const Dashboard = ({ navigation, route }) => {
         (txObj, error) => console.log(error)
       );
     });
-    setIsLoading(false);
+
+    // CREATE DIAGNOSTIC REPORTS TABLE
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS diagnosticReports (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, date TEXT, uri TEXT, doctor TEXT, notes TEXT)"
+      );
+    });
+
+    // CREATE MEAL TIMINGS TABLE
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS meal_timings_test (id INTEGER PRIMARY KEY AUTOINCREMENT, breakfast TEXT, lunch TEXT, dinner TEXT, user_id INTEGER)"
+      );
+    });
+
+    //CREATE MEDICINE LIST TABLE
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS medicine_list (id INTEGER PRIMARY KEY AUTOINCREMENT, medicineName TEXT, startDate TEXT, endDate TEXT, sunday INTEGER, monday INTEGER, tuesday INTEGER, wednesday INTEGER, thursday INTEGER, friday INTEGER, saturday INTEGER, BeforeBreakfast TEXT, AfterBreakfast TEXT, BeforeLunch TEXT, AfterLunch TEXT, BeforeDinner TEXT, AfterDinner TEXT, user_id INTEGER)"
+      );
+    });
+
+    // CREATE BLOOD PRESSURE TABLE
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS blood_pressure (id INTEGER PRIMARY KEY AUTOINCREMENT, systolic INTEGER, diastolic INTEGER, pulse INTEGER, user_id INTEGER, date TEXT)"
+      );
+    });
+
+    // CREATE BLOOD SUGAR TABLE
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS blood_sugar (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, test_type text, sugar_value INTEGER, user_id INTEGER)"
+      );
+    });
+
+    // CREATE DOCTORS INFORMATION TABLE
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS doctors_Info (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, specialty TEXT, address TEXT, contactNumber TEXT, lastVisited TEXT, nextVisit TEXT, prescription TEXT, user_id INTEGER)"
+      );
+    });
   }, []);
 
   return (
