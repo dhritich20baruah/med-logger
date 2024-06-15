@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { Text, View, StyleSheet, Alert, Button } from "react-native";
 import { Calendar } from "react-native-calendars";
 import * as SQLite from "expo-sqlite";
@@ -16,13 +16,20 @@ export default function History({ navigation, route }) {
 
   const db = SQLite.openDatabase("med-logger2.db");
 
+  const marked = useMemo(() => ({
+    [selected]: {
+      selected: true,
+      selectedColor: '#800000',
+      selectedTextColor: 'yellow',
+    }
+  }), [selected]);
+
   const handleDate = (day) => {
-    setSelected(day.dateString);
 
     db.transaction((tx) => {
       tx.executeSql(
         "SELECT * FROM diagnosticReports WHERE user_id = ? AND date = ?",
-        [userID, day.dateString.split("-").reverse().join("-")],
+        [userID, day.split("-").reverse().join("-")],
         (txObj, resultSet) => {
           setData((prevData) => ({
             ...prevData,
@@ -33,8 +40,8 @@ export default function History({ navigation, route }) {
       );
 
       tx.executeSql(
-        "SELECT * FROM medicine_list WHERE user_id = ? AND endDate <= ?",
-        [userID, day.dateString],
+        "SELECT * FROM medicine_list WHERE user_id = ? AND endDate >= ?",
+        [userID, day],
         (txObj, resultSet) => {
           setData((prevData) => ({
             ...prevData,
@@ -46,7 +53,7 @@ export default function History({ navigation, route }) {
 
       tx.executeSql(
         "SELECT * FROM blood_sugar WHERE user_id = ? AND date = ?",
-        [userID, day.dateString.split("-").reverse().join("-")],
+        [userID, day.split("-").reverse().join("-")],
         (txObj, resultSet) => {
           setData((prevData) => ({
             ...prevData,
@@ -58,7 +65,7 @@ export default function History({ navigation, route }) {
 
       tx.executeSql(
         "SELECT * FROM blood_pressure WHERE user_id = ? AND date = ?",
-        [userID, day.dateString.split("-").reverse().join("-")],
+        [userID, day.split("-").reverse().join("-")],
         (txObj, resultSet) => {
           setData((prevData) => ({
             ...prevData,
@@ -70,7 +77,7 @@ export default function History({ navigation, route }) {
 
       tx.executeSql(
         "SELECT * FROM doctors_Info WHERE user_id = ? AND nextVisit = ?",
-        [userID, day.dateString],
+        [userID, day],
         (txObj, resultSet) => {
           setData((prevData) => ({
             ...prevData,
@@ -91,11 +98,15 @@ export default function History({ navigation, route }) {
         initialDate={new Date().toISOString().split("T")[0]}
         maxDate={new Date().toISOString().split("T")[0]}
         disableAllTouchEventsForDisabledDays={true}
-        onDayPress={handleDate}
+        onDayPress={(day) => {
+          setSelected(day.dateString);
+          handleDate(day.dateString);
+        }}
+        markedDates={marked}
       />
       {/* Add more UI components to display the fetched data */}
-      <Text style={styles.headerText}>
-        Select a date: {selected}
+      <Text style={styles.headerText2}>
+        Selected date: <Text style={{color: "#800000", fontWeight: 'bold'}}>{selected.split("-").reverse().join("-")}</Text>
       </Text>
       <Button title="View History" onPress={()=>{ navigation.navigate("Day's Activity", {selected, data})}} color={'#800000'}/>
     </View>
@@ -111,6 +122,12 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   headerText: {
+    textAlign: "center",
+    fontSize: 20,
+    margin: 15,
+    fontWeight: 'bold'
+  },
+  headerText2: {
     textAlign: "center",
     fontSize: 15,
     margin: 15,
