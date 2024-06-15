@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome6";
 import * as SQLite from "expo-sqlite";
+import Footer from "./Footer";
 
 const Dashboard = ({ navigation, route }) => {
   const [users, setUsers] = useState([{id:"", name: "", weight: "", height: ""}]);
@@ -64,7 +65,7 @@ const Dashboard = ({ navigation, route }) => {
   }, []);
 
   return (
-    <View>
+    <SafeAreaView>
       <Text style={{color: "#800000", fontSize: 20, textAlign: "center", fontWeight: "bold"}}>Hello, {users[0].name}</Text>
       <View style={styles.container}>
       <View style={styles.row}>
@@ -127,7 +128,8 @@ const Dashboard = ({ navigation, route }) => {
           </View>
         </View>
       </View>
-    </View>
+      <Footer/>
+    </SafeAreaView>
   );
 };
 
@@ -137,7 +139,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "space-around",
     alignItems: "center",
-    padding: 10,
+    padding: 10
   },
   row: {
     flexDirection: "row",

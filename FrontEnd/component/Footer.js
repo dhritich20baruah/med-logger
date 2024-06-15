@@ -1,20 +1,20 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import FontAwesome from "@expo/vector-icons/FontAwesome6";
+import { useNavigation } from "@react-navigation/native";
 
-const Footer = ({ navigation }) => {
+const Footer = () => {
+    const navigation = useNavigation();
   return (
     <View style={styles.footerContainer}>
-      <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Home')}>
-        <Text style={styles.footerText}>Home</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Diagnostics')}>
-        <Text style={styles.footerText}>Diagnostics</Text>
+      <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Dashboard')}>
+      <FontAwesome name="house" size={35} color="#800000" style={styles.footerText}/>
       </TouchableOpacity>
       <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('History')}>
-        <Text style={styles.footerText}>History</Text>
+      <FontAwesome name="newspaper" size={35} color="#800000" style={styles.footerText}/>
       </TouchableOpacity>
       <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Settings')}>
-        <Text style={styles.footerText}>Settings</Text>
+      <FontAwesome name="gear" size={35} color="#800000" style={styles.footerText}/>
       </TouchableOpacity>
     </View>
   );
@@ -25,16 +25,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    height: 60,
-    backgroundColor: '#800000',
+    height: 100,
     paddingVertical: 10,
+    position: 'absolute', 
+    top: '100%',
+    width: '100%'
   },
   footerButton: {
     alignItems: 'center',
   },
   footerText: {
-    color: '#fff',
-    fontSize: 16,
+    color: '#800000',
+    fontSize: 25,
   },
 });
 

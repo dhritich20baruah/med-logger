@@ -7,10 +7,12 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
-  SafeAreaView,
+  StyleSheet,
+  ImageBackground
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import * as SQLite from "expo-sqlite";
 import Dashboard from "./component/Dashboard";
 import BloodPressure from "./component/BloodPressure";
@@ -27,6 +29,7 @@ import AddDoctor from "./component/Doctors/AddDoctor";
 import EditDoctor from "./component/Doctors/EditDoctor";
 import CameraFunction from "./component/Diagnotics/CameraFunction";
 import DailyActivity from "./component/History/DailyActivity";
+import Settings from "./component/Settings";
 
 function HomeScreen({ navigation, route }) {
   const [name, setName] = useState("");
@@ -38,6 +41,13 @@ function HomeScreen({ navigation, route }) {
   const [heightUnit, setHeightUnit] = useState(false);
   const [weightUnit, setWeightUnit] = useState(false);
   const [users, setUsers] = useState([]);
+  const [breakfast, setBreakfast] = useState(new Date());
+  const [lunch, setLunch] = useState(new Date());
+  const [dinner, setDinner] = useState(new Date());
+  const [timings, setTimings] = useState([]);
+  const [visibleBreakfast, setVisibleBreakfast] = useState(false);
+  const [visibleLunch, setVisibleLunch] = useState(false);
+  const [visibleDinner, setVisibleDinner] = useState(false);
 
   const toggleWeightUnit = () => {
     setWeightUnit((prevState) => !prevState);
@@ -45,6 +55,29 @@ function HomeScreen({ navigation, route }) {
 
   const toggleHeightUnit = () => {
     setHeightUnit((prevState) => !prevState);
+  };
+
+  const onChangeBreakfast = (e, selectedDate) => {
+    setBreakfast(selectedDate);
+    setVisibleBreakfast(!visibleBreakfast);
+  };
+
+  const onChangeLunch = (e, selectedDate) => {
+    setLunch(selectedDate);
+    setVisibleLunch(!visibleLunch);
+  };
+
+  const onChangeDinner = (e, selectedDate) => {
+    setDinner(selectedDate);
+    setVisibleDinner(!visibleDinner);
+  };
+
+  const getFormattedTime = (date) => {
+    return date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
   };
 
   //DATABASE
@@ -132,9 +165,12 @@ function HomeScreen({ navigation, route }) {
     });
   };
 
+  const image = require('./assets/Background.png');
+
   return (
     <ScrollView>
-      <View style={{ flex: 1, padding: 20, backgroundColor: "white" }}>
+      <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, justifyContent: 'center'}}>
+      <View style={{ flex: 1, padding: 20}}>
         <Text style={{ textAlign: "center", color: "#800000", fontSize: 20 }}>
           ADD NEW USER
         </Text>
@@ -264,11 +300,80 @@ function HomeScreen({ navigation, route }) {
             <Text style={{ color: heightUnit ? "white" : "black" }}>ft-in</Text>
           </TouchableOpacity>
         </View>
+        <View style={styles.container}>
+          <Text style={styles.title}>
+           Please enter your approximate times for having breakfast, lunch, and
+           dinner for the medicine tracker.
+          </Text>
+
+          {/* Breakfast */}
+          <TouchableOpacity
+            onPress={() => setVisibleBreakfast(!visibleBreakfast)}
+            style={styles.input}
+          >
+            <Text style={styles.inputText}>Set Breakfast Time</Text>
+            <Text style={styles.inputTime}>{getFormattedTime(breakfast)}</Text>
+          </TouchableOpacity>
+          {visibleBreakfast && (
+            <DateTimePicker
+              value={breakfast}
+              mode={"time"}
+              is24Hour={true}
+              display="default"
+              onChange={onChangeBreakfast}
+            />
+          )}
+
+          {/* Lunch */}
+          <TouchableOpacity
+            onPress={() => setVisibleLunch(!visibleLunch)}
+            style={styles.input}
+          >
+            <Text style={styles.inputText}>Set Lunch Time</Text>
+            <Text style={styles.inputTime}>{getFormattedTime(lunch)}</Text>
+          </TouchableOpacity>
+          {visibleLunch && (
+            <DateTimePicker
+              value={lunch}
+              mode={"time"}
+              is24Hour={true}
+              display="default"
+              onChange={onChangeLunch}
+            />
+          )}
+
+          {/* Dinner */}
+          <TouchableOpacity
+            onPress={() => setVisibleDinner(!visibleDinner)}
+            style={styles.input}
+          >
+            <Text style={styles.inputText}>Set Dinner Time</Text>
+            <Text style={styles.inputTime}>{getFormattedTime(dinner)}</Text>
+          </TouchableOpacity>
+          {visibleDinner && (
+            <DateTimePicker
+              value={dinner}
+              mode={"time"}
+              is24Hour={true}
+              display="default"
+              onChange={onChangeDinner}
+            />
+          )}
+        </View>
         <TouchableOpacity
           onPress={handleSubmit}
           style={{ backgroundColor: "orange", padding: 10, borderRadius: 5 }}
         >
-          <Text style={{ color: "white", textAlign: "center", fontSize: 15, fontWeight: '800' }}>SUBMIT</Text>
+          <Text
+            style={{
+              color: "white",
+              textAlign: "center",
+              fontSize: 15,
+              fontWeight: "800",
+            }}
+          >
+            SUBMIT
+          </Text>
         </TouchableOpacity>
 
         <Text
@@ -294,11 +399,13 @@ function HomeScreen({ navigation, route }) {
                     style={{
                       color: "#800000",
                       margin: 5,
-                      padding: 5,
+                      paddingVertical: 25,
+                      borderRadius: 15,
                       textAlign: "center",
                       backgroundColor: "white",
-                      fontSize: 20,
-                      elevation:15
+                      fontSize: 25,
+                      fontWeight: '500',
+                      elevation: 15,
                     }}
                   >
                     {item.name}
@@ -309,6 +416,7 @@ function HomeScreen({ navigation, route }) {
           })}
         </View>
       </View>
+      </ImageBackground>
     </ScrollView>
   );
 }
@@ -380,7 +488,7 @@ export default function App() {
             },
           })}
         />
-         <Stack.Screen
+        <Stack.Screen
           name="Camera"
           component={CameraFunction}
           options={() => ({
@@ -407,7 +515,7 @@ export default function App() {
             },
           })}
         />
-         <Stack.Screen
+        <Stack.Screen
           name="Add Medicine"
           component={AddMedicine}
           options={() => ({
@@ -443,7 +551,7 @@ export default function App() {
             },
           })}
         />
-         <Stack.Screen
+        <Stack.Screen
           name="Add Doctor Information"
           component={AddDoctor}
           options={() => ({
@@ -452,7 +560,7 @@ export default function App() {
             },
           })}
         />
-         <Stack.Screen
+        <Stack.Screen
           name="Edit Doctor Information"
           component={EditDoctor}
           options={() => ({
@@ -470,9 +578,18 @@ export default function App() {
             },
           })}
         />
-         <Stack.Screen
+        <Stack.Screen
           name="Day's Activity"
           component={DailyActivity}
+          options={() => ({
+            headerStyle: {
+              backgroundColor: "#800000",
+            },
+          })}
+        />
+        <Stack.Screen
+          name="Settings"
+          component={Settings}
           options={() => ({
             headerStyle: {
               backgroundColor: "#800000",
@@ -483,3 +600,27 @@ export default function App() {
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  title: {
+    margin: 5,
+    color: "#333",
+    fontWeight: "bold",
+  },
+  input: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+    marginBottom: 16,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  inputText: {
+    color: "#333",
+  },
+  inputTime: {
+    fontWeight: "bold",
+    color: "#800000",
+  },
+});
