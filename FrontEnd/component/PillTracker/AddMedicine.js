@@ -159,7 +159,7 @@ export default function AddMedicine({ navigation, route }) {
         ],
         (txObj, resultSet) => {
           Alert.alert("Medicine Added")
-          navigation.navigate("Dashboard", {userID})
+          navigation.goBack()
         },
         (txObj, error) => console.log(error)
       );

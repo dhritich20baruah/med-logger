@@ -14,7 +14,7 @@ const Dashboard = ({ navigation, route }) => {
   useEffect(() => {
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM user_info WHERE id = ?",
+        "SELECT * FROM userData WHERE id = ?",
         [userID],
         (txObj, resultSet) => setUsers(resultSet.rows._array),
         (txObj, error) => console.log(error)
@@ -28,14 +28,7 @@ const Dashboard = ({ navigation, route }) => {
       );
     });
 
-    // CREATE MEAL TIMINGS TABLE
-    db.transaction((tx) => {
-      tx.executeSql(
-        "CREATE TABLE IF NOT EXISTS meal_timings_test (id INTEGER PRIMARY KEY AUTOINCREMENT, breakfast TEXT, lunch TEXT, dinner TEXT, user_id INTEGER)"
-      );
-    });
-
-    //CREATE MEDICINE LIST TABLE
+     //CREATE MEDICINE LIST TABLE
     db.transaction((tx) => {
       tx.executeSql(
         "CREATE TABLE IF NOT EXISTS medicine_list (id INTEGER PRIMARY KEY AUTOINCREMENT, medicineName TEXT, startDate TEXT, endDate TEXT, sunday INTEGER, monday INTEGER, tuesday INTEGER, wednesday INTEGER, thursday INTEGER, friday INTEGER, saturday INTEGER, BeforeBreakfast TEXT, AfterBreakfast TEXT, BeforeLunch TEXT, AfterLunch TEXT, BeforeDinner TEXT, AfterDinner TEXT, user_id INTEGER)"
