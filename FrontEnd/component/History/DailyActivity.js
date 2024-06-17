@@ -7,7 +7,7 @@ export default function DailyActivity({ navigation, route }) {
   const [pillsArr, setPillsArr] = useState(data.pillsArr);
   const [sugarArr, setSugarArr] = useState(data.sugarArr);
   const [pressureArr, setPressureArr] = useState(data.pressureArr);
-  const [visitArr, setVisitArr] = useState(data.visitArr);
+
 
   return (
     <ScrollView>

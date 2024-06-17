@@ -10,10 +10,12 @@ import {
   StyleSheet,
   ImageBackground,
   Modal,
+  Platform
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import * as Notifications from 'expo-notifications';
 import * as SQLite from "expo-sqlite";
 import Dashboard from "./component/Dashboard";
 import BloodPressure from "./component/BloodPressure";
@@ -31,6 +33,7 @@ import EditDoctor from "./component/Doctors/EditDoctor";
 import CameraFunction from "./component/Diagnotics/CameraFunction";
 import DailyActivity from "./component/History/DailyActivity";
 import Settings from "./component/Settings";
+import { registerBackgroundFetch } from "./component/Notification";
 
 function HomeScreen({ navigation, route }) {
   const [users, setUsers] = useState([]);
@@ -46,7 +49,6 @@ function HomeScreen({ navigation, route }) {
   const [breakfast, setBreakfast] = useState(new Date());
   const [lunch, setLunch] = useState(new Date());
   const [dinner, setDinner] = useState(new Date());
-  const [timings, setTimings] = useState([]);
   const [visibleBreakfast, setVisibleBreakfast] = useState(false);
   const [visibleLunch, setVisibleLunch] = useState(false);
   const [visibleDinner, setVisibleDinner] = useState(false);
@@ -104,6 +106,33 @@ function HomeScreen({ navigation, route }) {
     });
   }, []);
 
+  useEffect(() => {
+    async function configureNotifications() {
+      if (Platform.OS === 'android') {
+        Notifications.setNotificationChannelAsync('default', {
+          name: 'default',
+          importance: Notifications.AndroidImportance.MAX,
+        });
+      }
+
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+
+      if (finalStatus !== 'granted') {
+        Alert.alert('Permission required', 'We need notification permissions to send you reminders.');
+        return;
+      }
+
+      registerBackgroundFetch();
+    }
+    configureNotifications();
+  }, []);
+  
   const image = require("./assets/Background.png");
 
   const handleSubmit = () => {

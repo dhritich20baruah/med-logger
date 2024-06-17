@@ -26,7 +26,7 @@ export default function AddMedicine({ navigation, route }) {
   const [date, setDate] = useState(new Date());
   const [durationUnit, setDurationUnit] = useState("Days");
   const [startDate, setStartDate] = useState(formattedDate);
-  const [endDate, setEndDate] = useState("2024-06-20");
+  const [endDate, setEndDate] = useState("");
   const [showDate, setShowDate] = useState(false);
   const [days, setDays] = useState({
     sunday: false,
@@ -95,7 +95,7 @@ export default function AddMedicine({ navigation, route }) {
   const calculateEndDate = (date, duration) => {
     const start = new Date(date);
     let end;
-
+  
     if (duration.includes("Days")) {
       const days = parseInt(duration.replace("Days", "").trim(), 10);
       end = new Date(start.setDate(start.getDate() + days));
@@ -106,8 +106,9 @@ export default function AddMedicine({ navigation, route }) {
       const months = parseInt(duration.replace("month", "").trim(), 10);
       end = new Date(start.setMonth(start.getMonth() + months));
     }
-    setEndDate(formatDate(end));
+    return formatDate(end);
   };
+  
 
   const formatDate = (date) => {
     if (!date) {
@@ -133,39 +134,46 @@ export default function AddMedicine({ navigation, route }) {
   };
 
   const handleSave = async () => {
-    calculateEndDate(date, `${selectedValue} + " " + ${durationUnit}`);
-
-    db.transaction((tx) => {
-      tx.executeSql(
-        `INSERT INTO medicine_list (medicineName, startDate, endDate, sunday, monday, tuesday, wednesday, thursday, friday, saturday, BeforeBreakfast, AfterBreakfast, BeforeLunch, AfterLunch, BeforeDinner, AfterDinner, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          medicineName,
-          startDate,
-          endDate,
-          days.sunday ? 1 : 0,
-          days.monday ? 1 : 0,
-          days.tuesday ? 1 : 0,
-          days.wednesday ? 1 : 0,
-          days.thursday ? 1 : 0,
-          days.friday ? 1 : 0,
-          days.saturday ? 1 : 0,
-          timing.BeforeBreakfast ? subtractMinutes(timings[0].breakfast) : "",
-          timing.AfterBreakfast ? timings[0].breakfast: "",
-          timing.BeforeLunch ? subtractMinutes(timings[0].lunch) : "",
-          timing.AfterLunch ? timings[0].lunch : "",
-          timing.BeforeDinner ? subtractMinutes(timings[0].dinner) : "",
-          timing.AfterDinner ? timings[0].dinner : "",
-          userID,
-        ],
-        (txObj, resultSet) => {
-          Alert.alert("Medicine Added")
-          navigation.goBack()
-        },
-        (txObj, error) => console.log(error)
-      );
-
-    });
+    const calculatedEndDate = calculateEndDate(date, `${selectedValue} ${durationUnit}`);
+    setEndDate(calculatedEndDate);
+  
+    // Adding a small delay to ensure state is updated
+    setTimeout(() => {
+      console.log(medicineName, startDate, calculatedEndDate);
+  
+      db.transaction((tx) => {
+        tx.executeSql(
+          `INSERT INTO medicine_list (medicineName, startDate, endDate, sunday, monday, tuesday, wednesday, thursday, friday, saturday, BeforeBreakfast, AfterBreakfast, BeforeLunch, AfterLunch, BeforeDinner, AfterDinner, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            medicineName,
+            startDate,
+            calculatedEndDate,
+            days.sunday ? 1 : 0,
+            days.monday ? 1 : 0,
+            days.tuesday ? 1 : 0,
+            days.wednesday ? 1 : 0,
+            days.thursday ? 1 : 0,
+            days.friday ? 1 : 0,
+            days.saturday ? 1 : 0,
+            timing.BeforeBreakfast ? subtractMinutes(timings[0].breakfast) : "",
+            timing.AfterBreakfast ? timings[0].breakfast : "",
+            timing.BeforeLunch ? subtractMinutes(timings[0].lunch) : "",
+            timing.AfterLunch ? timings[0].lunch : "",
+            timing.BeforeDinner ? subtractMinutes(timings[0].dinner) : "",
+            timing.AfterDinner ? timings[0].dinner : "",
+            userID,
+          ],
+          (txObj, resultSet) => {
+            Alert.alert("Medicine Added");
+            navigation.goBack();
+          },
+          (txObj, error) => console.log(error)
+        );
+      });
+    }, 100); // Adding a small delay to ensure state is updated
   };
+  
+
   return (
     <ScrollView>
       <View style={styles.container}>

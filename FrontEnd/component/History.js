@@ -2,7 +2,6 @@ import React, { useState, useMemo } from "react";
 import { Text, View, StyleSheet, Alert, Button } from "react-native";
 import { Calendar } from "react-native-calendars";
 import * as SQLite from "expo-sqlite";
-
 export default function History({ navigation, route }) {
   const { userID } = route.params;
   const [selected, setSelected] = useState("");
@@ -16,7 +15,7 @@ export default function History({ navigation, route }) {
 
   const db = SQLite.openDatabase("med-logger2.db");
 
-  const marked = useMemo(() => ({
+   const marked = useMemo(() => ({
     [selected]: {
       selected: true,
       selectedColor: '#800000',
@@ -40,8 +39,8 @@ export default function History({ navigation, route }) {
       );
 
       tx.executeSql(
-        "SELECT * FROM medicine_list WHERE user_id = ? AND endDate >= ?",
-        [userID, day],
+        "SELECT * FROM medicine_list WHERE user_id = ? AND startDate <= ? AND endDate >= ?",
+        [userID, day, day],
         (txObj, resultSet) => {
           setData((prevData) => ({
             ...prevData,

@@ -18,7 +18,9 @@ import * as SQLite from "expo-sqlite";
 
 export default function EditMedicine({ navigation, route }) {
   const { userID, medicineDetails, timings } = route.params;
-  const [medicineName, setMedicineName] = useState(medicineDetails.medicineName);
+  const [medicineName, setMedicineName] = useState(
+    medicineDetails.medicineName
+  );
 
   let initialDate = new Date(medicineDetails.startDate);
 
@@ -106,7 +108,7 @@ export default function EditMedicine({ navigation, route }) {
       const months = parseInt(duration.replace("month", "").trim(), 10);
       end = new Date(start.setMonth(start.getMonth() + months));
     }
-    setEndDate(formatDate(end));
+    return formatDate(end);
   };
 
   const formatDate = (date) => {
@@ -133,55 +135,49 @@ export default function EditMedicine({ navigation, route }) {
   };
 
   const handleSave = () => {
-    calculateEndDate(date, `${selectedValue} + " " + ${durationUnit}`);
-    console.log("Hello")
-    console.log(medicineName, startDate, endDate,        
-      days.sunday ? 1 : 0,
-      days.monday ? 1 : 0,
-      days.tuesday ? 1 : 0,
-      days.wednesday ? 1 : 0,
-      days.thursday ? 1 : 0,
-      days.friday ? 1 : 0,
-      days.saturday ? 1 : 0,
-      timing.BeforeBreakfast ? subtractMinutes(timings[0].breakfast) : "",
-      timing.AfterBreakfast ? timings[0].breakfast: "",
-      timing.BeforeLunch ? subtractMinutes(timings[0].lunch) : "",
-      timing.AfterLunch ? timings[0].lunch : "",
-      timing.BeforeDinner ? subtractMinutes(timings[0].dinner) : "",
-      timing.AfterDinner ? timings[0].dinner : "")
+    const calculatedEndDate = calculateEndDate(
+      date,
+      `${selectedValue} ${durationUnit}`
+    );
+    setEndDate(calculatedEndDate);
 
-    db.transaction((tx) => {
-      tx.executeSql(
-        `UPDATE medicine_list  SET medicineName = ?, startDate = ?, endDate = ?, sunday = ?, monday = ?, tuesday = ?, wednesday = ?, thursday = ?, friday = ?, saturday = ?, BeforeBreakfast = ?, AfterBreakfast = ?, BeforeLunch = ?, AfterLunch = ?, BeforeDinner = ?, AfterDinner = ? WHERE id = ? AND user_id = ?`,
-        [
-          medicineName,
-          startDate,
-          endDate,
-          days.sunday ? 1 : 0,
-          days.monday ? 1 : 0,
-          days.tuesday ? 1 : 0,
-          days.wednesday ? 1 : 0,
-          days.thursday ? 1 : 0,
-          days.friday ? 1 : 0,
-          days.saturday ? 1 : 0,
-          timing.BeforeBreakfast ? subtractMinutes(timings[0].breakfast) : "",
-          timing.AfterBreakfast ? timings[0].breakfast: "",
-          timing.BeforeLunch ? subtractMinutes(timings[0].lunch) : "",
-          timing.AfterLunch ? timings[0].lunch : "",
-          timing.BeforeDinner ? subtractMinutes(timings[0].dinner) : "",
-          timing.AfterDinner ? timings[0].dinner : "",
-          medicineDetails.id,
-          userID,
-        ],
-        (txObj, resultSet) => {
-          Alert.alert("Medicine Updated")
-          navigation.navigate("Dashboard", {userID})
-        },
-        (txObj, error) => console.log(error)
-      );
+    // Adding a small delay to ensure state is updated
+    setTimeout(() => {
+      // console.log(medicineName, startDate, calculatedEndDate);
 
-    });
+      db.transaction((tx) => {
+        tx.executeSql(
+          `UPDATE medicine_list  SET medicineName = ?, startDate = ?, endDate = ?, sunday = ?, monday = ?, tuesday = ?, wednesday = ?, thursday = ?, friday = ?, saturday = ?, BeforeBreakfast = ?, AfterBreakfast = ?, BeforeLunch = ?, AfterLunch = ?, BeforeDinner = ?, AfterDinner = ? WHERE id = ? AND user_id = ?`,
+          [
+            medicineName,
+            startDate,
+            endDate,
+            days.sunday ? 1 : 0,
+            days.monday ? 1 : 0,
+            days.tuesday ? 1 : 0,
+            days.wednesday ? 1 : 0,
+            days.thursday ? 1 : 0,
+            days.friday ? 1 : 0,
+            days.saturday ? 1 : 0,
+            timing.BeforeBreakfast ? subtractMinutes(timings[0].breakfast) : "",
+            timing.AfterBreakfast ? timings[0].breakfast : "",
+            timing.BeforeLunch ? subtractMinutes(timings[0].lunch) : "",
+            timing.AfterLunch ? timings[0].lunch : "",
+            timing.BeforeDinner ? subtractMinutes(timings[0].dinner) : "",
+            timing.AfterDinner ? timings[0].dinner : "",
+            medicineDetails.id,
+            userID,
+          ],
+          (txObj, resultSet) => {
+            Alert.alert("Medicine Updated");
+            navigation.goBack();
+          },
+          (txObj, error) => console.log(error)
+        );
+      });
+    }, 100); // Adding a small delay to ensure state is updated
   };
+
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -258,7 +254,9 @@ export default function EditMedicine({ navigation, route }) {
         </View>
 
         {/* MEDICATION SCHEDULE */}
-        <Text style={styles.textStyle}>Do you want to change your medication days?</Text>
+        <Text style={styles.textStyle}>
+          Do you want to change your medication days?
+        </Text>
         <View style={styles.radioAllBtnContainer}>
           <TouchableOpacity
             style={[
@@ -319,7 +317,7 @@ export default function EditMedicine({ navigation, route }) {
 
         {/* MEDICATION TIMINGS */}
         <Text style={styles.textStyle}>
-        Do you want to change your medication times?
+          Do you want to change your medication times?
         </Text>
         <View>
           {/* Breakfast */}
