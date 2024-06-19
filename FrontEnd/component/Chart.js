@@ -15,12 +15,12 @@ const Chart = ({data}) => {
       chartConfig={{
         backgroundColor: '#ffffff',
         backgroundGradientFrom: '#ffffff',
-        backgroundGradientTo: '#ffffff',
+        backgroundGradientTo: '#fff',
         decimalPlaces: 0, // optional, defaults to 2dp
         color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
         labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
         style: {
-          borderRadius: 16
+          borderRadius: 16,
         },
         propsForDots: {
           r: '6',

@@ -11,9 +11,12 @@ import {
 } from "react-native";
 import Chart from "./Chart";
 import * as SQLite from "expo-sqlite";
+import FontAwesome from "@expo/vector-icons/FontAwesome6";
+import { useNavigation } from "@react-navigation/native";
 
 export default function BloodSugar({ route }) {
   const { userID } = route.params;
+  const navigation = useNavigation();
   const [fasting, setFasting] = useState([
     { date: "01-01-2024", testType: "Fasting", sugarValue: 90 },
   ]);
@@ -175,8 +178,9 @@ export default function BloodSugar({ route }) {
   };
 
   return (
-    <ScrollView>
-      <View style={styles.container}>
+    <View style={styles.container}>
+      <ScrollView >
+        {/* Previous record */}
         <View style={styles.recordContainer}>
           <Text style={styles.heading}>Last Record</Text>
           <View style={styles.lastRecord}>
@@ -261,12 +265,15 @@ export default function BloodSugar({ route }) {
             </Modal>
           </View>
         </View>
+        {/* New Record Form */}
         <View
           style={{
-            padding: 10,
+            paddingVertical: 10,
             backgroundColor: "white",
-            width: 350,
             elevation: 5,
+            flex: 1,
+            alignItems: "center",
+            justifyContent: 'center'
           }}
         >
           <Text
@@ -281,6 +288,7 @@ export default function BloodSugar({ route }) {
           </Text>
           <View
             style={{
+              flex: 1,
               flexDirection: "row",
               marginBottom: 10,
               justifyContent: "center",
@@ -362,7 +370,7 @@ export default function BloodSugar({ route }) {
         </View>
 
         {/* CHARTS */}
-        <View style={{ margin: 10 }}>
+        <View style={{ flex: 1, width: '100%' }}>
           <Text style={{ textAlign: "center", color: "#800000" }}>
             Last Seven Fasting Blood Sugar Readings
           </Text>
@@ -375,18 +383,28 @@ export default function BloodSugar({ route }) {
             Last Seven Random Blood Sugar Readings
           </Text>
           <Chart data={rbsData} />
-        </View>
-      </View>
-    </ScrollView>
+        </View>       
+      </ScrollView>
+      <TouchableOpacity
+          onPress={() =>
+            navigation.navigate("Blood Sugar Tests")
+          }
+          style={styles.floatBtn}
+        >
+          <FontAwesome name="newspaper" size={30} color="#800000" style={styles.footerText}/>
+          <Text style={styles.btnText}>Insights</Text>
+        </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     margin: 5,
-    display: "flex",
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    position: 'relative',
   },
   recordContainer: {
     backgroundColor: "#800000",
@@ -430,9 +448,9 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   radioContainer: {
+    flex: 1,
     flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
+    justifyContent: "center",
   },
   radioButton: {
     backgroundColor: "#f0f0f0",
@@ -507,5 +525,24 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 3,    
     textAlign: 'center'
+  },
+  floatBtn: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "white",
+    position: "absolute",
+    borderRadius: 10,
+    top: 650,
+    right: 30,
+    padding: 3,
+    borderWidth: 1,
+    borderColor: '#800000'
+  },
+  btnText: {
+    color: "#800000",
+    fontSize: 12,
+    padding: 3,
   },
 });

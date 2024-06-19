@@ -119,31 +119,31 @@ export default function BloodPressure({ navigation, route }) {
       <Chart data={pressureData} />
       {/* Blood Pressure Insights */}
       <View style={{marginVertical: 10, backgroundColor: 'white', borderRadius: 10, padding: 10}}>
-        <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 21}}>Stages of High Blood Pressure</Text>
+        <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 21, color: "#800000"}}>Stages of High Blood Pressure</Text>
         <View style={{margin: 10}}>
           <Text style={{fontWeight: '700', fontSize: 18, color: 'green'}}>1. Normal Blood Pressure:</Text>
-          <Text style={{fontWeight: '700', fontSize: 18, color: 'green'}}>Systolic: Less than 120 mm Hg</Text>
-          <Text style={{fontWeight: '700', fontSize: 18, color: 'green'}}>Diastolic: Less than 80 mm Hg</Text>
+          <Text style={{fontSize: 18, marginHorizontal: 15}}>Systolic: Less than 120 mm Hg</Text>
+          <Text style={{fontSize: 18, marginHorizontal: 15}}>Diastolic: Less than 80 mm Hg</Text>
         </View>
-        <View>
-          <Text>2. Elevated Blood Pressure:</Text>
-          <Text>Systolic: 120-129 mm Hg</Text>
-          <Text>Diastolic: Less than 80 mm Hg</Text>
+        <View style={{margin: 10}}>
+          <Text style={{fontWeight: '700', fontSize: 18, color: 'blue'}}>2. Elevated Blood Pressure:</Text>
+          <Text style={{fontSize: 18, marginHorizontal: 15}}>Systolic: 120-129 mm Hg</Text>
+          <Text style={{fontSize: 18, marginHorizontal: 15}}>Diastolic: Less than 80 mm Hg</Text>
         </View>
-        <View>
-          <Text>3. Hypertension Stage 1:</Text>
-          <Text>Systolic: 130-139 mm Hg</Text>
-          <Text>Diastolic: 80-89 mm Hg</Text>
+        <View style={{margin: 10}}> 
+          <Text style={{fontWeight: '700', fontSize: 18, color: '#d5b60a'}}>3. Hypertension Stage 1:</Text>
+          <Text style={{fontSize: 18, marginHorizontal: 15}}>Systolic: 130-139 mm Hg</Text>
+          <Text style={{fontSize: 18, marginHorizontal: 15}}>Diastolic: 80-89 mm Hg</Text>
         </View>
-        <View>
-          <Text>4. Hypertension Stage 2:</Text>
-          <Text>Systolic: 140 mm Hg or higher</Text>
-          <Text>Diastolic: 90 mm Hg or higher</Text>
+        <View style={{margin: 10}}>
+          <Text style={{fontWeight: '700', fontSize: 18, color: 'orange'}}>4. Hypertension Stage 2:</Text>
+          <Text style={{fontSize: 18, marginHorizontal: 15}}>Systolic: 140 mm Hg or higher</Text>
+          <Text style={{fontSize: 18, marginHorizontal: 15}}>Diastolic: 90 mm Hg or higher</Text>
         </View>
-        <View>
-          <Text>5. Hypertensive Crisis &#91;requires immediate medical attention&#93;:</Text>
-          <Text>Systolic: Higher than 180 mm Hg</Text>
-          <Text>Diastolic:Higher than 120 mm Hg</Text>
+        <View style={{margin: 10}}>
+          <Text style={{fontWeight: '700', fontSize: 18, color: 'red'}}>5. Hypertensive Crisis &#91;requires immediate medical attention&#93;:</Text>
+          <Text style={{fontSize: 18, marginHorizontal: 15}}>Systolic: Higher than 180 mm Hg</Text>
+          <Text style={{fontSize: 18, marginHorizontal: 15}}>Diastolic:Higher than 120 mm Hg</Text>
         </View>
       </View>
     </ScrollView>
