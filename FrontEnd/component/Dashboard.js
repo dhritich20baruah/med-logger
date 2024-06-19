@@ -28,13 +28,6 @@ const Dashboard = ({ navigation, route }) => {
       );
     });
 
-     //CREATE MEDICINE LIST TABLE
-    db.transaction((tx) => {
-      tx.executeSql(
-        "CREATE TABLE IF NOT EXISTS medicine_list (id INTEGER PRIMARY KEY AUTOINCREMENT, medicineName TEXT, startDate TEXT, endDate TEXT, sunday INTEGER, monday INTEGER, tuesday INTEGER, wednesday INTEGER, thursday INTEGER, friday INTEGER, saturday INTEGER, BeforeBreakfast TEXT, AfterBreakfast TEXT, BeforeLunch TEXT, AfterLunch TEXT, BeforeDinner TEXT, AfterDinner TEXT, user_id INTEGER)"
-      );
-    });
-
     // CREATE BLOOD PRESSURE TABLE
     db.transaction((tx) => {
       tx.executeSql(

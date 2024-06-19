@@ -29,7 +29,7 @@ export default function BloodPressure({ navigation, route }) {
   const db = SQLite.openDatabase("med-logger2.db");
 
   useEffect(() => {
-     db.transaction((tx) => {
+    db.transaction((tx) => {
       tx.executeSql(
         "SELECT * FROM blood_pressure WHERE user_id = ?",
         [userID],
@@ -55,7 +55,7 @@ export default function BloodPressure({ navigation, route }) {
       .split("-")
       .reverse()
       .join("-");
-  
+
     db.transaction((tx) => {
       tx.executeSql(
         "INSERT INTO blood_pressure (systolic, diastolic, pulse, user_id, date) values (?, ?, ?, ?, ?)",
@@ -83,14 +83,18 @@ export default function BloodPressure({ navigation, route }) {
     labels: prevReadings.map((item) => item.date).slice(-7),
     datasets: [
       {
-        data: prevReadings.length >= 7
-        ? prevReadings.map((item) => item.systolic).slice(-7)
-        : prevReadings.map((item) => item.systolic),
+        data:
+          prevReadings.length >= 7
+            ? prevReadings.map((item) => item.systolic).slice(-7)
+            : prevReadings.map((item) => item.systolic),
         color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
         strokeWidth: 2, // optional
       },
       {
-        data: prevReadings.length >= 7 ? prevReadings.map((item) => item.diastolic).slice(-7) : prevReadings.map((item) => item.diastolic),
+        data:
+          prevReadings.length >= 7
+            ? prevReadings.map((item) => item.diastolic).slice(-7)
+            : prevReadings.map((item) => item.diastolic),
         color: (opacity = 1) => `rgba(134, 65, 204, ${opacity})`, // optional
         strokeWidth: 2, // optional
       },
@@ -98,7 +102,7 @@ export default function BloodPressure({ navigation, route }) {
   };
 
   return (
-    <View>
+    <ScrollView>
       <RecordCard prevReadings={prevReadings} />
       <AddRecordForm
         systolic={systolic}
@@ -113,7 +117,36 @@ export default function BloodPressure({ navigation, route }) {
         Last Seven Blood Pressure Readings
       </Text>
       <Chart data={pressureData} />
-    </View>
+      {/* Blood Pressure Insights */}
+      <View style={{marginVertical: 10, backgroundColor: 'white', borderRadius: 10, padding: 10}}>
+        <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 21}}>Stages of High Blood Pressure</Text>
+        <View style={{margin: 10}}>
+          <Text style={{fontWeight: '700', fontSize: 18, color: 'green'}}>1. Normal Blood Pressure:</Text>
+          <Text style={{fontWeight: '700', fontSize: 18, color: 'green'}}>Systolic: Less than 120 mm Hg</Text>
+          <Text style={{fontWeight: '700', fontSize: 18, color: 'green'}}>Diastolic: Less than 80 mm Hg</Text>
+        </View>
+        <View>
+          <Text>2. Elevated Blood Pressure:</Text>
+          <Text>Systolic: 120-129 mm Hg</Text>
+          <Text>Diastolic: Less than 80 mm Hg</Text>
+        </View>
+        <View>
+          <Text>3. Hypertension Stage 1:</Text>
+          <Text>Systolic: 130-139 mm Hg</Text>
+          <Text>Diastolic: 80-89 mm Hg</Text>
+        </View>
+        <View>
+          <Text>4. Hypertension Stage 2:</Text>
+          <Text>Systolic: 140 mm Hg or higher</Text>
+          <Text>Diastolic: 90 mm Hg or higher</Text>
+        </View>
+        <View>
+          <Text>5. Hypertensive Crisis &#91;requires immediate medical attention&#93;:</Text>
+          <Text>Systolic: Higher than 180 mm Hg</Text>
+          <Text>Diastolic:Higher than 120 mm Hg</Text>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
@@ -165,7 +198,7 @@ const RecordCard = ({ prevReadings }) => {
               <View style={styles.modalView}>
                 <Text style={styles.modalText}>Your historical data</Text>
                 <View style={styles.table}>
-                  <View style={{display: "flex", flexDirection: "row"}}>
+                  <View style={{ display: "flex", flexDirection: "row" }}>
                     <Text style={styles.tableHeader}>Date</Text>
                     <Text style={styles.tableHeader}>Systolic</Text>
                     <Text style={styles.tableHeader}>Diastolic</Text>
@@ -191,7 +224,6 @@ const RecordCard = ({ prevReadings }) => {
             </View>
           </ScrollView>
         </Modal>
-        <Button onPress={() => setModalVisible(true)} title="Open Modal" />
       </View>
     </View>
   );
@@ -337,24 +369,24 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: "center",
-    fontSize: 20
+    fontSize: 20,
   },
   table: {
     width: 320,
-    marginVertical: 10
+    marginVertical: 10,
   },
   tableRow: {
     flexDirection: "row",
   },
   tableHeader: {
-    flex:1, 
-    padding: 5, 
-    fontWeight: 'bold', 
-    textAlign: 'center',
+    flex: 1,
+    padding: 5,
+    fontWeight: "bold",
+    textAlign: "center",
   },
   tableCell: {
     flex: 1,
-    padding: 3,    
-    textAlign: 'center'
+    padding: 3,
+    textAlign: "center",
   },
 });

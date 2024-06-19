@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Text,
   View,
@@ -10,7 +10,8 @@ import {
   StyleSheet,
   ImageBackground,
   Modal,
-  Platform
+  Platform,
+  Button
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -33,7 +34,17 @@ import EditDoctor from "./component/Doctors/EditDoctor";
 import CameraFunction from "./component/Diagnotics/CameraFunction";
 import DailyActivity from "./component/History/DailyActivity";
 import Settings from "./component/Settings";
-import { registerBackgroundFetch } from "./component/Notification";
+
+  //DATABASE
+  const db = SQLite.openDatabase("med-logger2.db");
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 function HomeScreen({ navigation, route }) {
   const [users, setUsers] = useState([]);
@@ -52,9 +63,6 @@ function HomeScreen({ navigation, route }) {
   const [visibleBreakfast, setVisibleBreakfast] = useState(false);
   const [visibleLunch, setVisibleLunch] = useState(false);
   const [visibleDinner, setVisibleDinner] = useState(false);
-
-  //DATABASE
-  const db = SQLite.openDatabase("med-logger2.db");
 
   const toggleWeightUnit = () => {
     setWeightUnit((prevState) => !prevState);
@@ -106,33 +114,6 @@ function HomeScreen({ navigation, route }) {
     });
   }, []);
 
-  useEffect(() => {
-    async function configureNotifications() {
-      if (Platform.OS === 'android') {
-        Notifications.setNotificationChannelAsync('default', {
-          name: 'default',
-          importance: Notifications.AndroidImportance.MAX,
-        });
-      }
-
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-
-      if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-
-      if (finalStatus !== 'granted') {
-        Alert.alert('Permission required', 'We need notification permissions to send you reminders.');
-        return;
-      }
-
-      registerBackgroundFetch();
-    }
-    configureNotifications();
-  }, []);
-  
   const image = require("./assets/Background.png");
 
   const handleSubmit = () => {
@@ -499,6 +480,53 @@ function HomeScreen({ navigation, route }) {
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  const [expoPushToken, setExpoPushToken] = useState("");
+  const [notification, setNotification] = useState(false);
+  const notificationListener = useRef();
+  const responseListener = useRef();
+  const [pillTimings, setPillTimings] = useState([]);
+
+  useEffect(() => {
+   //CREATE MEDICINE LIST TABLE
+   db.transaction((tx) => {
+    tx.executeSql(
+      "CREATE TABLE IF NOT EXISTS medicine_list (id INTEGER PRIMARY KEY AUTOINCREMENT, medicineName TEXT, startDate TEXT, endDate TEXT, sunday INTEGER, monday INTEGER, tuesday INTEGER, wednesday INTEGER, thursday INTEGER, friday INTEGER, saturday INTEGER, BeforeBreakfast TEXT, AfterBreakfast TEXT, BeforeLunch TEXT, AfterLunch TEXT, BeforeDinner TEXT, AfterDinner TEXT, user_id INTEGER)"
+    );
+  });
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM medicine_list",
+        null,
+        (txObj, resultSet) => {
+          setPillTimings(resultSet.rows._array);
+          // console.log(resultSet.rows._array);
+        },
+        (txObj, error) => console.log(error)
+      );
+    });
+
+    notificationListener.current =
+    Notifications.addNotificationReceivedListener((notification) => {
+      setNotification(notification);
+    });
+
+  responseListener.current =
+    Notifications.addNotificationResponseReceivedListener((response) => {
+      console.log(response);
+    });
+
+  return () => {
+    Notifications.removeNotificationSubscription(
+      notificationListener.current
+    );
+    Notifications.removeNotificationSubscription(responseListener.current);
+  };
+
+  }, []);
+
+  schedulePushNotification(pillTimings);
+
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -674,6 +702,64 @@ export default function App() {
       </Stack.Navigator>
     </NavigationContainer>
   );
+}
+
+async function schedulePushNotification(medications) {
+  const now = new Date();
+
+  for (const med of medications) {
+    const startDate = new Date(med.startDate);
+    const endDate = new Date(med.endDate);
+
+    // Check if the current date is within the medication period
+    if (now >= startDate && now <= endDate) {
+      const daysOfWeek = [
+        med.sunday,
+        med.monday,
+        med.tuesday,
+        med.wednesday,
+        med.thursday,
+        med.friday,
+        med.saturday,
+      ];
+
+      // Get today's day of the week (0-6 where 0 is Sunday)
+      const today = now.getDay();
+
+      if (daysOfWeek[today]) {
+        // Schedule notifications for the relevant times
+        const times = [
+          { time: med.BeforeBreakfast, label: "Before Breakfast" },
+          { time: med.AfterBreakfast, label: "After Breakfast" },
+          { time: med.BeforeLunch, label: "Before Lunch" },
+          { time: med.AfterLunch, label: "After Lunch" },
+          { time: med.BeforeDinner, label: "Before Dinner" },
+          { time: med.AfterDinner, label: "After Dinner" },
+        ];
+
+        for (const { time, label } of times) {
+          if (time) {
+            const [hours, minutes] = time.split(":").map(Number);
+            const notificationTime = new Date(now);
+            notificationTime.setHours(hours, minutes, 0, 0);
+
+            // Only schedule future notifications
+            if (notificationTime > now) {
+              await Notifications.scheduleNotificationAsync({
+                content: {
+                  title: `Time to take your medication: ${med.medicineName}`,
+                  body: `${label} - ${med.medicineName}`,
+                },
+                trigger: {
+                  seconds: (notificationTime.getTime() - now.getTime()) / 1000,
+                },
+              });
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 const styles = StyleSheet.create({

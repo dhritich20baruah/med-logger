@@ -57,11 +57,12 @@ export default function Display({ route }) {
       await MediaLibrary.deleteAssetsAsync([assetId])
       await db.transaction((tx) => {
         tx.executeSql(
-          "DELETE FROM gallery WHERE id = ?",
+          "DELETE FROM diagnosticReports WHERE id = ?",
           [imageId],
           (txObj, resultSet) => {
             if (resultSet.rowsAffected > 0) {
-            console.log("Image deleted")
+            Alert.alert("Image deleted")
+            navigation.goBack()
             }
           },
           (txObj, error) => console.log(error)

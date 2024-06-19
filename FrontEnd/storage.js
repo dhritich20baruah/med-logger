@@ -1,119 +1,189 @@
-// import * as Notifications from 'expo-notifications';
-// import * as TaskManager from 'expo-task-manager';
+import React, { useEffect, useState, useRef } from 'react';
+import { Text, View, Button, Platform } from 'react-native';
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
+import * as SQLite from 'expo-sqlite';
 
-// async function scheduleNotification(time, message, id) {
-//   const trigger = new Date(time);
-//   await Notifications.scheduleNotificationAsync({
-//     content: {
-//       title: 'Medicine Reminder',
-//       body: message,
-//     },
-//     trigger,
-//     identifier: id,
-//   });
-// }
+// Initialize SQLite Database
+const db = SQLite.openDatabase('notifications.db');
 
-// const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND-NOTIFICATION-TASK';
+// Fetch medication data from SQLite
+const fetchPills = () => {
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        "SELECT * FROM medicine_list WHERE user_id = ?",
+        [userID],
+        (txObj, resultSet) => resolve(resultSet.rows._array),
+        (txObj, error) => reject(error)
+      );
+    });
+  });
+};
 
-// TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async () => {
-//   // Fetch medicines from the database
-//   const medicines = await fetchPills(); // You need to modify this function to return a promise
+// Process and schedule notifications based on medication data
+const scheduleNotificationsForMedication = async (medications) => {
+  const now = new Date();
   
-//   // Current date and time
-//   const now = new Date();
-  
-//   medicines.forEach((medicine) => {
-//     const { startDate, endDate, AfterBreakfast, AfterLunch, AfterDinner, BeforeBreakfast, BeforeLunch, BeforeDinner } = medicine;
+  for (const med of medications) {
+    const startDate = new Date(med.startDate);
+    const endDate = new Date(med.endDate);
 
-//     const start = new Date(startDate);
-//     const end = new Date(endDate);
+    // Check if the current date is within the medication period
+    if (now >= startDate && now <= endDate) {
+      const daysOfWeek = [
+        med.sunday, med.monday, med.tuesday, med.wednesday, 
+        med.thursday, med.friday, med.saturday
+      ];
 
-//     if (now >= start && now <= end) {
-//       if (AfterBreakfast) {
-//         const afterBreakfastTime = new Date();
-//         afterBreakfastTime.setHours(...AfterBreakfast.split(':').map(Number));
-//         if (afterBreakfastTime > now) {
-//           scheduleNotification(afterBreakfastTime, `Time to take your ${medicine.medicineName} after breakfast`, `${medicine.id}-AfterBreakfast`);
-//         }
-//       }
-//       // Repeat for other times like AfterLunch, AfterDinner, BeforeBreakfast, BeforeLunch, BeforeDinner
-//     }
-//   });
-// });
+      // Get today's day of the week (0-6 where 0 is Sunday)
+      const today = now.getDay();
 
-// // Register the task to be executed in the background
-// TaskManager.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
+      if (daysOfWeek[today]) {
+        // Schedule notifications for the relevant times
+        const times = [
+          { time: med.BeforeBreakfast, label: 'Before Breakfast' },
+          { time: med.AfterBreakfast, label: 'After Breakfast' },
+          { time: med.BeforeLunch, label: 'Before Lunch' },
+          { time: med.AfterLunch, label: 'After Lunch' },
+          { time: med.BeforeDinner, label: 'Before Dinner' },
+          { time: med.AfterDinner, label: 'After Dinner' },
+        ];
 
-// import * as BackgroundFetch from 'expo-background-fetch';
+        for (const { time, label } of times) {
+          if (time) {
+            const [hours, minutes] = time.split(':').map(Number);
+            const notificationTime = new Date(now);
+            notificationTime.setHours(hours, minutes, 0, 0);
 
-// async function registerBackgroundFetch() {
-//   await BackgroundFetch.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK, {
-//     minimumInterval: 15 * 60, // 15 minutes
-//     stopOnTerminate: false,
-//     startOnBoot: true,
-//   });
-// }
+            // Only schedule future notifications
+            if (notificationTime > now) {
+              await Notifications.scheduleNotificationAsync({
+                content: {
+                  title: `Time to take your medication: ${med.medicineName}`,
+                  body: `${label} - ${med.medicineName}`,
+                },
+                trigger: { seconds: (notificationTime.getTime() - now.getTime()) / 1000 },
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+};
 
-// const fetchPills = () => {
-//   return new Promise((resolve, reject) => {
-//     db.transaction((tx) => {
-//       tx.executeSql(
-//         "SELECT * FROM medicine_list WHERE user_id = ?",
-//         [userID],
-//         (txObj, resultSet) => {
-//           resolve(resultSet.rows._array);
-//         },
-//         (txObj, error) => {
-//           console.log(error);
-//           reject(error);
-//         }
-//       );
-//     });
-//   });
-// }
+// Set Notification Handler
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
-// import React, { useEffect } from 'react';
-// import { Platform } from 'react-native';
-// import * as Notifications from 'expo-notifications';
-// import * as Permissions from 'expo-permissions';
+export default function App() {
+  const [expoPushToken, setExpoPushToken] = useState('');
+  const [channels, setChannels] = useState([]);
+  const [notification, setNotification] = useState(undefined);
+  const notificationListener = useRef();
+  const responseListener = useRef();
 
-// export default function App() {
-//   useEffect(() => {
-//     async function configureNotifications() {
-//       if (Platform.OS === 'android') {
-//         Notifications.setNotificationChannelAsync('default', {
-//           name: 'default',
-//           importance: Notifications.AndroidImportance.MAX,
-//         });
-//       }
-//       const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
-//       if (status !== 'granted') {
-//         await Permissions.askAsync(Permissions.NOTIFICATIONS);
-//       }
-//       registerBackgroundFetch();
-//     }
-//     configureNotifications();
-//   }, []);
-  
-//   useEffect(() => {
-//     async function configureNotifications() {
-//       if (Platform.OS === 'android') {
-//         Notifications.setNotificationChannelAsync('default', {
-//           name: 'default',
-//           importance: Notifications.AndroidImportance.MAX,
-//         });
-//       }
-//       const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
-//       if (status !== 'granted') {
-//         await Permissions.askAsync(Permissions.NOTIFICATIONS);
-//       }
-//       registerBackgroundFetch();
-//     }
-//     configureNotifications();
-//   }, []);
+  useEffect(() => {
+    registerForPushNotificationsAsync().then(token => token && setExpoPushToken(token));
 
-//   return (
-//     <View></View>
-//     // Your app components
-//   );
-// }
+    if (Platform.OS === 'android') {
+      Notifications.getNotificationChannelsAsync().then(value => setChannels(value ?? []));
+    }
+
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      setNotification(notification);
+    });
+
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log(response);
+    });
+
+    // Fetch medication data and schedule notifications
+    fetchPills().then(medications => scheduleNotificationsForMedication(medications));
+
+    return () => {
+      notificationListener.current && Notifications.removeNotificationSubscription(notificationListener.current);
+      responseListener.current && Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
+
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'space-around' }}>
+      <Text>Your expo push token: {expoPushToken}</Text>
+      <Text>{`Channels: ${JSON.stringify(channels.map(c => c.id), null, 2)}`}</Text>
+      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <Text>Title: {notification && notification.request.content.title} </Text>
+        <Text>Body: {notification && notification.request.content.body}</Text>
+        <Text>Data: {notification && JSON.stringify(notification.request.content.data)}</Text>
+      </View>
+      <Button
+        title="Press to schedule a test notification"
+        onPress={async () => {
+          await schedulePushNotification();
+        }}
+      />
+    </View>
+  );
+}
+
+async function schedulePushNotification() {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "You've got mail! 📬",
+      body: 'Here is the notification body',
+      data: { data: 'goes here', test: { test1: 'more data' } },
+    },
+    trigger: { seconds: 2 },
+  });
+}
+
+async function registerForPushNotificationsAsync() {
+  let token;
+
+  if (Platform.OS === 'android') {
+    await Notifications.setNotificationChannelAsync('default', {
+      name: 'default',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#FF231F7C',
+    });
+  }
+
+  if (Device.isDevice) {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    if (finalStatus !== 'granted') {
+      alert('Failed to get push token for push notification!');
+      return;
+    }
+    try {
+      const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
+      if (!projectId) {
+        throw new Error('Project ID not found');
+      }
+      token = (
+        await Notifications.getExpoPushTokenAsync({
+          projectId,
+        })
+      ).data;
+      console.log(token);
+    } catch (e) {
+      token = `${e}`;
+    }
+  } else {
+    alert('Must use physical device for Push Notifications');
+  }
+
+  return token;
+}
