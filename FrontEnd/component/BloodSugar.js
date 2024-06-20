@@ -7,9 +7,10 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Modal
+  Modal,
 } from "react-native";
 import Chart from "./Chart";
+import BarGraph from "./BarChart";
 import * as SQLite from "expo-sqlite";
 import FontAwesome from "@expo/vector-icons/FontAwesome6";
 import { useNavigation } from "@react-navigation/native";
@@ -33,7 +34,7 @@ export default function BloodSugar({ route }) {
   const [testType, settestType] = useState("");
   const [sugarValue, setSugarValue] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
-
+ 
   //DATABASE
   const db = SQLite.openDatabase("med-logger2.db");
 
@@ -50,24 +51,24 @@ export default function BloodSugar({ route }) {
             sugarValue: item.sugar_value,
           }));
           // Update the state with the fetched readings
-          if(readings.length !== 0){
+          if (readings.length !== 0) {
             const fastingSugar = readings.filter(
               (item) => item.testType == "Fasting"
             );
             setFasting(fastingSugar);
-  
+
             const ppSugar = readings.filter(
               (item) => item.testType == "Postprandial"
             );
             setPostprandial(ppSugar);
-  
+
             const RandomSugar = readings.filter(
               (item) => item.testType == "Random"
             );
             setRandom(RandomSugar);
-            
-            setPrevReadings(readings)
-          }        
+
+            setPrevReadings(readings);
+          }
         },
         (txObj, error) => console.log(error)
       );
@@ -134,7 +135,7 @@ export default function BloodSugar({ route }) {
     });
   };
 
-  // CHART DATA
+   // CHART DATA
   const fbsData = {
     labels: fasting.map((item) => item.date).slice(-7),
     datasets: [
@@ -177,9 +178,17 @@ export default function BloodSugar({ route }) {
     ],
   };
 
+  const [graphType, setGraphType] = useState("Fasting");
+  const [graphData, setGraphData] = useState(fbsData)
+
+  const handleGraph = (option, option2) => {
+    setGraphType(option);
+    setGraphData(option2)
+  };
+
   return (
     <View style={styles.container}>
-      <ScrollView >
+      <ScrollView>
         {/* Previous record */}
         <View style={styles.recordContainer}>
           <Text style={styles.heading}>Last Record</Text>
@@ -187,10 +196,10 @@ export default function BloodSugar({ route }) {
             <View style={styles.recordItem}>
               <Text style={styles.label}>Fasting</Text>
               <Text style={styles.value}>
-              {mgDL && fasting.length > 0
+                {mgDL && fasting.length > 0
                   ? fasting[fasting.length - 1].sugarValue
                   : fasting.length > 0
-                  ? fasting[fasting.length - 1].sugarValue * 0.05
+                  ? (fasting[fasting.length - 1].sugarValue * 0.05).toFixed(2)
                   : "N/A"}
               </Text>
               <Text style={styles.unit}>{!mgDL ? "(mmol/L)" : "(mg/dL)"}</Text>
@@ -198,10 +207,12 @@ export default function BloodSugar({ route }) {
             <View style={styles.recordItem}>
               <Text style={styles.label}>Postprandial (PP)</Text>
               <Text style={styles.value}>
-              {mgDL && postprandial.length > 0
+                {mgDL && postprandial.length > 0
                   ? postprandial[postprandial.length - 1].sugarValue
                   : postprandial.length > 0
-                  ? postprandial[postprandial.length - 1].sugarValue * 0.05
+                  ? (
+                      postprandial[postprandial.length - 1].sugarValue * 0.05
+                    ).toFixed(2)
                   : "N/A"}
               </Text>
               <Text style={styles.unit}>{!mgDL ? "(mmol/L)" : "(mg/dL)"}</Text>
@@ -209,19 +220,23 @@ export default function BloodSugar({ route }) {
             <View style={styles.recordItem}>
               <Text style={styles.label}>Random</Text>
               <Text style={styles.value}>
-              {mgDL && random.length > 0
+                {mgDL && random.length > 0
                   ? random[random.length - 1].sugarValue
                   : random.length > 0
-                  ? random[random.length - 1].sugarValue * 0.05
+                  ? (random[random.length - 1].sugarValue * 0.05).toFixed(2)
                   : "N/A"}
               </Text>
               <Text style={styles.unit}>{!mgDL ? "(mmol/L)" : "(mg/dL)"}</Text>
             </View>
           </View>
-          <Button title="VIEW HISTORY" onPress={() => setModalVisible(true)} color="#FFA500" />
+          <Button
+            title="VIEW HISTORY"
+            onPress={() => setModalVisible(true)}
+            color="#FFA500"
+          />
 
           {/* Modal */}
-          <View style={{flex: 1}}>
+          <View style={{ flex: 1 }}>
             <Modal
               animationType="slide"
               transparent={true}
@@ -273,7 +288,7 @@ export default function BloodSugar({ route }) {
             elevation: 5,
             flex: 1,
             alignItems: "center",
-            justifyContent: 'center'
+            justifyContent: "center",
           }}
         >
           <Text
@@ -282,6 +297,7 @@ export default function BloodSugar({ route }) {
               fontWeight: "bold",
               color: "#800000",
               fontSize: 20,
+              margin: 10,
             }}
           >
             ADD NEW RECORD
@@ -319,7 +335,14 @@ export default function BloodSugar({ route }) {
 
           {/* Radio buttons */}
           <View style={styles.container}>
-            <Text style={{ fontSize: 18, color: "#800000", margin: 10 }}>
+            <Text
+              style={{
+                fontSize: 18,
+                color: "#800000",
+                margin: 15,
+                textAlign: "center",
+              }}
+            >
               Select test type:
             </Text>
             <View style={styles.radioContainer}>
@@ -370,48 +393,73 @@ export default function BloodSugar({ route }) {
         </View>
 
         {/* CHARTS */}
-        <View style={{ flex: 1, width: '100%' }}>
-          <Text style={{ textAlign: "center", color: "#800000" }}>
-            Last Seven Fasting Blood Sugar Readings
+        {/* Radio buttons */}
+        <View style={styles.container}>
+            <Text style={{ fontSize: 18, color: "#800000", margin: 15, textAlign: 'center' }}>
+              Select which graph you want to view:
+            </Text>
+            <View style={styles.radioContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.radioButton,
+                  graphType === "Fasting" && styles.selectedButton,
+                ]}
+                onPress={() => handleGraph("Fasting", fbsData)}
+              >
+                <Text style={styles.radioText}>Fasting</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.radioButton,
+                  graphType === "Postprandial" && styles.selectedButton,
+                ]}
+                onPress={() => handleGraph("Postprandial", pbsData)}
+              >
+                <Text style={styles.radioText}>Postprandial</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.radioButton,
+                  graphType === "Random" && styles.selectedButton,
+                ]}
+                onPress={() => handleGraph("Random", rbsData)}
+              >
+                <Text style={styles.radioText}>Random</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        <View style={{ marginVertical: 10 }}>
+          <Text style={{ textAlign: "center", color: "#800000", fontSize: 15 }}>
+            Last Seven <Text style={{fontWeight: 'bold'}}>{graphType}</Text> Blood Sugar Readings
           </Text>
-          <Chart data={fbsData} />
-          <Text style={{ textAlign: "center", color: "#800000" }}>
-            Last Seven Postprandial Blood Sugar Readings
-          </Text>
-          <Chart data={pbsData} />
-          <Text style={{ textAlign: "center", color: "#800000" }}>
-            Last Seven Random Blood Sugar Readings
-          </Text>
-          <Chart data={rbsData} />
-        </View>       
+          <BarGraph data={graphData}/>
+        </View>
       </ScrollView>
       <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("Blood Sugar Tests")
-          }
-          style={styles.floatBtn}
-        >
-          <FontAwesome name="newspaper" size={30} color="#800000" style={styles.footerText}/>
-          <Text style={styles.btnText}>Insights</Text>
-        </TouchableOpacity>
+        onPress={() => navigation.navigate("Blood Sugar Tests")}
+        style={styles.floatBtn}
+      >
+        <FontAwesome
+          name="newspaper"
+          size={30}
+          color="#800000"
+          style={styles.footerText}
+        />
+        <Text style={styles.btnText}>Insights</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    margin: 5,
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    position: 'relative',
+    position: "relative",
   },
   recordContainer: {
     backgroundColor: "#800000",
     padding: 20,
     borderRadius: 10,
-    marginBottom: 20,
-    width: 400,
+    marginVertical: 10,
   },
   heading: {
     fontSize: 20,
@@ -448,7 +496,7 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   radioContainer: {
-    flex: 1,
+    display: "flex",
     flexDirection: "row",
     justifyContent: "center",
   },
@@ -470,9 +518,11 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   testTypeText: {
-    marginTop: 20,
-    fontSize: 16,
+    margin: 20,
+    fontSize: 18,
     color: "#800000",
+    fontWeight: "600",
+    textAlign: "center",
   },
   addInput: {
     height: 50,
@@ -506,29 +556,29 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: "center",
-    fontSize: 20
+    fontSize: 20,
   },
   table: {
     width: 320,
-    marginVertical: 10
+    marginVertical: 10,
   },
   tableRow: {
     flexDirection: "row",
   },
   tableHeader: {
-    flex:1, 
-    padding: 5, 
-    fontWeight: 'bold', 
-    textAlign: 'center',
+    flex: 1,
+    padding: 5,
+    fontWeight: "bold",
+    textAlign: "center",
   },
   tableCell: {
     flex: 1,
-    padding: 3,    
-    textAlign: 'center'
+    padding: 3,
+    textAlign: "center",
   },
   floatBtn: {
     flex: 1,
-    flexDirection: 'column',
+    flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "white",
@@ -537,8 +587,7 @@ const styles = StyleSheet.create({
     top: 650,
     right: 30,
     padding: 3,
-    borderWidth: 1,
-    borderColor: '#800000'
+ 
   },
   btnText: {
     color: "#800000",

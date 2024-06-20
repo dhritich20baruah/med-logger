@@ -87,16 +87,16 @@ export default function BloodPressure({ navigation, route }) {
           prevReadings.length >= 7
             ? prevReadings.map((item) => item.systolic).slice(-7)
             : prevReadings.map((item) => item.systolic),
-        color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
-        strokeWidth: 2, // optional
+        color: (opacity = 1) => `rgba(255, 200, 0, ${opacity})`, // optional
+        strokeWidth: 4, // optional
       },
       {
         data:
           prevReadings.length >= 7
             ? prevReadings.map((item) => item.diastolic).slice(-7)
             : prevReadings.map((item) => item.diastolic),
-        color: (opacity = 1) => `rgba(134, 65, 204, ${opacity})`, // optional
-        strokeWidth: 2, // optional
+        color: (opacity = 1) => `rgba(255, 50, 0, ${opacity})`, // optional
+        strokeWidth: 4, // optional
       },
     ],
   };

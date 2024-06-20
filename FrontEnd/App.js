@@ -11,12 +11,12 @@ import {
   ImageBackground,
   Modal,
   Platform,
-  Button
+  Button,
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import * as Notifications from 'expo-notifications';
+import * as Notifications from "expo-notifications";
 import * as SQLite from "expo-sqlite";
 import Dashboard from "./component/Dashboard";
 import BloodPressure from "./component/BloodPressure";
@@ -35,9 +35,10 @@ import CameraFunction from "./component/Diagnotics/CameraFunction";
 import DailyActivity from "./component/History/DailyActivity";
 import Settings from "./component/Settings";
 import BloodSugarInfo from "./component/Insights/BloodSugarInfo";
+import Insights from "./component/Insights";
 
-  //DATABASE
-  const db = SQLite.openDatabase("med-logger2.db");
+//DATABASE
+const db = SQLite.openDatabase("med-logger2.db");
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -166,7 +167,15 @@ function HomeScreen({ navigation, route }) {
     db.transaction((tx) => {
       tx.executeSql(
         "INSERT INTO userData (name, age, weight, height, breakfast, lunch, dinner) values (?, ?, ?, ?, ?, ?, ?)",
-        [name, age, weightResult, heightResult, breakfastTime, lunchTime, dinnerTime],
+        [
+          name,
+          age,
+          weightResult,
+          heightResult,
+          breakfastTime,
+          lunchTime,
+          dinnerTime,
+        ],
         (txObj, resultSet) => {
           let currentUser = [...users];
           currentUser.push({ id: resultSet.insertId, name: name });
@@ -177,8 +186,8 @@ function HomeScreen({ navigation, route }) {
           setFeet("");
           setInch("");
           setWeight("");
-          setModalVisible(false)
-          Alert.alert("New User Added")
+          setModalVisible(false);
+          Alert.alert("New User Added");
         },
         (txObj, error) => console.log(error)
       );
@@ -238,7 +247,7 @@ function HomeScreen({ navigation, route }) {
                     padding: 10,
                     borderWidth: 1,
                     borderColor: "#800000",
-                    borderRadius: 10
+                    borderRadius: 10,
                   }}
                 />
                 <TextInput
@@ -251,7 +260,7 @@ function HomeScreen({ navigation, route }) {
                     padding: 10,
                     borderWidth: 1,
                     borderColor: "#800000",
-                    borderRadius: 10
+                    borderRadius: 10,
                   }}
                 />
                 <Text style={{ marginBottom: 5 }}>
@@ -267,7 +276,7 @@ function HomeScreen({ navigation, route }) {
                     padding: 10,
                     borderWidth: 1,
                     borderColor: "#800000",
-                    borderRadius: 10
+                    borderRadius: 10,
                   }}
                 />
                 <View style={{ flexDirection: "row", marginBottom: 10 }}>
@@ -314,7 +323,7 @@ function HomeScreen({ navigation, route }) {
                           padding: 10,
                           borderWidth: 1,
                           borderColor: "#800000",
-                          borderRadius: 10
+                          borderRadius: 10,
                         }}
                       />
                       <TextInput
@@ -327,7 +336,7 @@ function HomeScreen({ navigation, route }) {
                           padding: 10,
                           borderWidth: 1,
                           borderColor: "#800000",
-                          borderRadius: 10
+                          borderRadius: 10,
                         }}
                       />
                     </View>
@@ -341,7 +350,7 @@ function HomeScreen({ navigation, route }) {
                         padding: 10,
                         borderWidth: 1,
                         borderColor: "#800000",
-                        borderRadius: 10
+                        borderRadius: 10,
                       }}
                     />
                   )}
@@ -464,7 +473,7 @@ function HomeScreen({ navigation, route }) {
                     backgroundColor: "red",
                     padding: 10,
                     borderRadius: 5,
-                    marginTop: 5
+                    marginTop: 5,
                   }}
                 >
                   <Text style={styles.cancelText}>CANCEL</Text>
@@ -488,12 +497,12 @@ export default function App() {
   const [pillTimings, setPillTimings] = useState([]);
 
   useEffect(() => {
-   //CREATE MEDICINE LIST TABLE
-   db.transaction((tx) => {
-    tx.executeSql(
-      "CREATE TABLE IF NOT EXISTS medicine_list (id INTEGER PRIMARY KEY AUTOINCREMENT, medicineName TEXT, startDate TEXT, endDate TEXT, sunday INTEGER, monday INTEGER, tuesday INTEGER, wednesday INTEGER, thursday INTEGER, friday INTEGER, saturday INTEGER, BeforeBreakfast TEXT, AfterBreakfast TEXT, BeforeLunch TEXT, AfterLunch TEXT, BeforeDinner TEXT, AfterDinner TEXT, user_id INTEGER)"
-    );
-  });
+    //CREATE MEDICINE LIST TABLE
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS medicine_list (id INTEGER PRIMARY KEY AUTOINCREMENT, medicineName TEXT, startDate TEXT, endDate TEXT, sunday INTEGER, monday INTEGER, tuesday INTEGER, wednesday INTEGER, thursday INTEGER, friday INTEGER, saturday INTEGER, BeforeBreakfast TEXT, AfterBreakfast TEXT, BeforeLunch TEXT, AfterLunch TEXT, BeforeDinner TEXT, AfterDinner TEXT, user_id INTEGER)"
+      );
+    });
 
     db.transaction((tx) => {
       tx.executeSql(
@@ -508,22 +517,21 @@ export default function App() {
     });
 
     notificationListener.current =
-    Notifications.addNotificationReceivedListener((notification) => {
-      setNotification(notification);
-    });
+      Notifications.addNotificationReceivedListener((notification) => {
+        setNotification(notification);
+      });
 
-  responseListener.current =
-    Notifications.addNotificationResponseReceivedListener((response) => {
-      console.log(response);
-    });
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log(response);
+      });
 
-  return () => {
-    Notifications.removeNotificationSubscription(
-      notificationListener.current
-    );
-    Notifications.removeNotificationSubscription(responseListener.current);
-  };
-
+    return () => {
+      Notifications.removeNotificationSubscription(
+        notificationListener.current
+      );
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
   }, []);
 
   schedulePushNotification(pillTimings);
@@ -700,7 +708,7 @@ export default function App() {
             },
           })}
         />
-            <Stack.Screen
+        <Stack.Screen
           name="Blood Sugar Tests"
           component={BloodSugarInfo}
           options={() => ({
@@ -878,5 +886,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 15,
     fontWeight: "800",
-  }
+  },
 });

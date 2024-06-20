@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Text, View, Button, Platform } from 'react-native';
+import { Text, View, Button, Platform, StyleSheet } from 'react-native';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
@@ -187,3 +187,59 @@ async function registerForPushNotificationsAsync() {
 
   return token;
 }
+
+const ModalCode = () => {
+  const [modalVisible, setModalVisible] = useState(false);
+
+  return(
+    <Modal
+    animationType="slide"
+    transparent={true}
+    visible={modalVisible}
+    onRequestClose={() => {
+      setModalVisible(false);
+    }}
+  >
+    <View style={styles.centeredView}>
+      <View style={styles.modalView}>
+
+      <Button
+        onPress={() => setModalVisible(false)}
+        title="Close"
+        color={"orange"}
+        />
+        </View>
+    </View>
+  </Modal>
+  )
+}
+
+const styles = StyleSheet.create({
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 5,
+    width: 350,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontSize: 20,
+  },
+})

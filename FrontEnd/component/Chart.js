@@ -14,7 +14,7 @@ const Chart = ({data}) => {
       yAxisLabel=""
       chartConfig={{
         backgroundColor: '#ffffff',
-        backgroundGradientFrom: '#ffffff',
+        backgroundGradientFrom: '#fff',
         backgroundGradientTo: '#fff',
         decimalPlaces: 0, // optional, defaults to 2dp
         color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
