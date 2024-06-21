@@ -33,6 +33,7 @@ import AddDoctor from "./component/Doctors/AddDoctor";
 import EditDoctor from "./component/Doctors/EditDoctor";
 import CameraFunction from "./component/Diagnotics/CameraFunction";
 import DailyActivity from "./component/History/DailyActivity";
+import Settings from "./component/Settings";
 
 //DATABASE
 const db = SQLite.openDatabase("med-logger2.db");
@@ -690,6 +691,15 @@ export default function App() {
         <Stack.Screen
           name="Day's Activity"
           component={DailyActivity}
+          options={() => ({
+            headerStyle: {
+              backgroundColor: "#800000",
+            },
+          })}
+        />
+        <Stack.Screen
+          name="Settings"
+          component={Settings}
           options={() => ({
             headerStyle: {
               backgroundColor: "#800000",

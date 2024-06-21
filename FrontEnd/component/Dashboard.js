@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
+  SafeAreaView,
+  Button
+} from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome6";
 import * as SQLite from "expo-sqlite";
-import Footer from "./Footer";
 
 const Dashboard = ({ navigation, route }) => {
   const [users, setUsers] = useState([{id:"", name: "", weight: "", height: ""}]);
   const { userID } = route.params;
-
   //DATABASE
   const db = SQLite.openDatabase("med-logger2.db");
 
@@ -20,7 +27,6 @@ const Dashboard = ({ navigation, route }) => {
         (txObj, error) => console.log(error)
       );
     });
-
     // CREATE DIAGNOSTIC REPORTS TABLE
     db.transaction((tx) => {
       tx.executeSql(
@@ -52,14 +58,25 @@ const Dashboard = ({ navigation, route }) => {
 
   return (
     <SafeAreaView>
-      <Text style={{color: "#800000", fontSize: 20, textAlign: "center", fontWeight: "bold"}}>Hello, {users[0].name}</Text>
+      <Text
+        style={{
+          color: "#800000",
+          fontSize: 20,
+          textAlign: "center",
+          fontWeight: "bold",
+        }}
+      >
+        Hello, {users[0].name}
+      </Text>
       <View style={styles.container}>
-      <View style={styles.row}>
+        <View style={styles.row}>
           <View style={styles.cell}>
             <FontAwesome name="x-ray" size={50} color="#800000" />
             <Text style={styles.tileText}>Diagnostic Reports</Text>
             <TouchableOpacity
-              onPress={() => navigation.navigate("Diagnostic Reports", {userID})}
+              onPress={() =>
+                navigation.navigate("Diagnostic Reports", { userID })
+              }
             >
               <Text style={styles.tileButton}>RECORD</Text>
             </TouchableOpacity>
@@ -68,7 +85,7 @@ const Dashboard = ({ navigation, route }) => {
             <FontAwesome name="pills" size={50} color="#800000" />
             <Text style={styles.tileText}>Pill Tracker</Text>
             <TouchableOpacity
-              onPress={() => navigation.navigate("Pill Tracker", {userID})}
+              onPress={() => navigation.navigate("Pill Tracker", { userID })}
             >
               <Text style={styles.tileButton}>TRACK</Text>
             </TouchableOpacity>
@@ -79,7 +96,7 @@ const Dashboard = ({ navigation, route }) => {
             <FontAwesome name="heart-pulse" size={50} color="#800000" />
             <Text style={styles.tileText}>Blood Pressure</Text>
             <TouchableOpacity
-              onPress={() => navigation.navigate("Blood Pressure", {userID})}
+              onPress={() => navigation.navigate("Blood Pressure", { userID })}
             >
               <Text style={styles.tileButton}>RECORD</Text>
             </TouchableOpacity>
@@ -88,19 +105,19 @@ const Dashboard = ({ navigation, route }) => {
             <FontAwesome name="droplet" size={50} color="#800000" />
             <Text style={styles.tileText}>Blood Sugar</Text>
             <TouchableOpacity
-              onPress={() => navigation.navigate("Blood Sugar", {userID})}
+              onPress={() => navigation.navigate("Blood Sugar", { userID })}
             >
               <Text style={styles.tileButton}>RECORD</Text>
             </TouchableOpacity>
           </View>
         </View>
-        
+
         <View style={styles.row}>
           <View style={styles.cell}>
             <FontAwesome name="user-doctor" size={50} color="#800000" />
             <Text style={styles.tileText}>Your Doctors</Text>
             <TouchableOpacity
-              onPress={() => navigation.navigate("Your Doctors", {userID})}
+              onPress={() => navigation.navigate("Your Doctors", { userID })}
             >
               <Text style={styles.tileButton}>SAVE & VIEW</Text>
             </TouchableOpacity>
@@ -108,13 +125,41 @@ const Dashboard = ({ navigation, route }) => {
           <View style={styles.cell}>
             <FontAwesome name="calendar-days" size={50} color="#800000" />
             <Text style={styles.tileText}>History</Text>
-            <TouchableOpacity onPress={() => navigation.navigate("History", {userID})}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("History", { userID })}
+            >
               <Text style={styles.tileButton}>VIEW</Text>
             </TouchableOpacity>
           </View>
         </View>
       </View>
-      <Footer userID={userID}/>
+      <View style={styles.footerContainer}>
+      <TouchableOpacity
+        style={styles.footerButton}
+        onPress={() => navigation.navigate("Med Logger")}
+      >
+        <FontAwesome
+          name="house"
+          size={35}
+          color="#800000"
+          style={styles.footerText}
+        />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.footerButton}
+        onPress={() =>
+          navigation.navigate("Settings", { userID })
+        }
+      >
+        <FontAwesome
+          name="gear"
+          size={35}
+          color="#800000"
+          style={styles.footerText}
+        />
+      </TouchableOpacity>     
+    </View>
     </SafeAreaView>
   );
 };
@@ -125,7 +170,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "space-around",
     alignItems: "center",
-    padding: 10
+    padding: 10,
   },
   row: {
     flexDirection: "row",
@@ -151,6 +196,23 @@ const styles = StyleSheet.create({
     color: "white",
     padding: 5,
   },
+  footerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    height: 100,
+    paddingVertical: 10,
+    position: "absolute",
+    top: "100%",
+    width: "100%",
+  },
+  footerButton: {
+    alignItems: "center",
+  },
+  footerText: {
+    color: "#800000",
+    fontSize: 25,
+  }
 });
 
 export default Dashboard;
