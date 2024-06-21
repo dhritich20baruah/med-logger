@@ -14,6 +14,7 @@ import BarGraph from "./BarChart";
 import * as SQLite from "expo-sqlite";
 import FontAwesome from "@expo/vector-icons/FontAwesome6";
 import { useNavigation } from "@react-navigation/native";
+import BloodSugarInfo from "./BloodSugarInfo";
 
 export default function BloodSugar({ route }) {
   const { userID } = route.params;
@@ -434,19 +435,8 @@ export default function BloodSugar({ route }) {
           </Text>
           <BarGraph data={graphData}/>
         </View>
+        <BloodSugarInfo/>
       </ScrollView>
-      <TouchableOpacity
-        onPress={() => navigation.navigate("Blood Sugar Tests")}
-        style={styles.floatBtn}
-      >
-        <FontAwesome
-          name="newspaper"
-          size={30}
-          color="#800000"
-          style={styles.footerText}
-        />
-        <Text style={styles.btnText}>Insights</Text>
-      </TouchableOpacity>
     </View>
   );
 }

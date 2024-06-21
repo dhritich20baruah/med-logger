@@ -114,7 +114,7 @@ const Dashboard = ({ navigation, route }) => {
           </View>
         </View>
       </View>
-      <Footer/>
+      <Footer userID={userID}/>
     </SafeAreaView>
   );
 };
