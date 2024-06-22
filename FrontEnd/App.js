@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Text,
   View,
@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useFocusEffect } from "@react-navigation/native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as Notifications from "expo-notifications";
 import * as SQLite from "expo-sqlite";
@@ -34,6 +35,7 @@ import EditDoctor from "./component/Doctors/EditDoctor";
 import CameraFunction from "./component/Diagnotics/CameraFunction";
 import DailyActivity from "./component/History/DailyActivity";
 import Settings from "./component/Settings";
+import EditProfile from "./component/Settings/EditProfile";
 
 //DATABASE
 const db = SQLite.openDatabase("med-logger2.db");
@@ -100,8 +102,16 @@ function HomeScreen({ navigation, route }) {
       tx.executeSql(
         "CREATE TABLE IF NOT EXISTS userData (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, age INTEGER, weight REAL, height REAL, breakfast TEXT, lunch TEXT, dinner TEXT)"
       );
-    });
+    }); 
+  }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchUsers();
+    }, [])
+  );
+
+  const fetchUsers = () => {
     db.transaction((tx) => {
       tx.executeSql(
         "SELECT * FROM userData",
@@ -112,7 +122,7 @@ function HomeScreen({ navigation, route }) {
         (txObj, error) => console.log(error)
       );
     });
-  }, []);
+  }
 
   const image = require("./assets/Background.png");
 
@@ -531,8 +541,10 @@ export default function App() {
       Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, []);
-
-  schedulePushNotification(pillTimings);
+  
+  useEffect(()=>{
+    schedulePushNotification(pillTimings);
+  }, [])
 
   return (
     <NavigationContainer>
@@ -700,6 +712,15 @@ export default function App() {
         <Stack.Screen
           name="Settings"
           component={Settings}
+          options={() => ({
+            headerStyle: {
+              backgroundColor: "#800000",
+            },
+          })}
+        />
+          <Stack.Screen
+          name="Edit Profile"
+          component={EditProfile}
           options={() => ({
             headerStyle: {
               backgroundColor: "#800000",
