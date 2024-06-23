@@ -8,17 +8,15 @@ import {
   TouchableOpacity,
   ScrollView,
   Modal,
+  Alert
 } from "react-native";
-import Chart from "./Chart";
 import BarGraph from "./BarChart";
 import * as SQLite from "expo-sqlite";
-import FontAwesome from "@expo/vector-icons/FontAwesome6";
 import { useNavigation } from "@react-navigation/native";
 import BloodSugarInfo from "./BloodSugarInfo";
 
 export default function BloodSugar({ route }) {
   const { userID } = route.params;
-  const navigation = useNavigation();
   const [fasting, setFasting] = useState([
     { date: "01-01-2024", testType: "Fasting", sugarValue: 90 },
   ]);
@@ -84,7 +82,16 @@ export default function BloodSugar({ route }) {
     settestType(option);
   };
 
+  const validateForm = () => {
+    if (sugarValue == 0) {
+      Alert.alert("Validation Error", "Please enter valid blood sugar value");
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = () => {
+    if (validateForm()) {
     // Handle form submission here
     let dateString = new Date().toISOString();
     let date = dateString
@@ -135,8 +142,10 @@ export default function BloodSugar({ route }) {
       );
     });
   };
+  };
 
    // CHART DATA
+  
   const fbsData = {
     labels: fasting.map((item) => item.date).slice(-7),
     datasets: [
@@ -192,7 +201,7 @@ export default function BloodSugar({ route }) {
       <ScrollView>
         {/* Previous record */}
         <View style={styles.recordContainer}>
-          <Text style={styles.heading}>Last Record</Text>
+          <Text style={styles.heading}>Previous Records</Text>
           <View style={styles.lastRecord}>
             <View style={styles.recordItem}>
               <Text style={styles.label}>Fasting</Text>

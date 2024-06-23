@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Text, View, StyleSheet, Alert, Button } from "react-native";
+import { Text, View, StyleSheet, Button } from "react-native";
 import { Calendar } from "react-native-calendars";
 import * as SQLite from "expo-sqlite";
 export default function History({ navigation, route }) {

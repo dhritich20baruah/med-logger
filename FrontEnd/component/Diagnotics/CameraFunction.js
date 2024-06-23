@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { useEffect, useState, useRef } from "react";
 import { Camera } from "expo-camera";
-import { shareAsync } from "expo-sharing";
 import * as MediaLibrary from "expo-media-library";
 import * as SQLite from "expo-sqlite";
 import FontAwesome from "@expo/vector-icons/FontAwesome6";

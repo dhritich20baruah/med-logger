@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Modal,
   ScrollView,
+  Alert
 } from "react-native";
 import Chart from "./Chart";
 import * as SQLite from "expo-sqlite";
@@ -48,7 +49,17 @@ export default function BloodPressure({ navigation, route }) {
     });
   }, []);
 
+  const validateForm = () => {
+    if (!systolic.trim() || !diastolic.trim() || !pulse.trim()) {
+      Alert.alert("Validation Error", "Pressure reading is required.");
+      return false;
+    }
+
+    return true;
+  };
+
   const submitPressure = () => {
+    if (validateForm()) {
     let dateString = new Date().toISOString();
     let date = dateString
       .slice(0, dateString.indexOf("T"))
@@ -77,6 +88,7 @@ export default function BloodPressure({ navigation, route }) {
         (txObj, error) => console.log(error)
       );
     });
+  };
   };
 
   const pressureData = {

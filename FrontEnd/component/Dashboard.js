@@ -4,10 +4,7 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
-  Modal,
   SafeAreaView,
-  Button
 } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome6";
 import * as SQLite from "expo-sqlite";

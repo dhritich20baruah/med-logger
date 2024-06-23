@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -6,11 +6,7 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
-  StyleSheet,
-  ImageBackground,
-  Modal,
-  Platform,
-  Button,
+  StyleSheet
 } from "react-native";
 import * as SQLite from "expo-sqlite";
 import DateTimePicker from "@react-native-community/datetimepicker";

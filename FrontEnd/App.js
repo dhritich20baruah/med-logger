@@ -27,7 +27,6 @@ import Pills from "./component/Pills";
 import Doctors from "./component/Doctors";
 import History from "./component/History";
 import Display from "./component/Diagnotics/Display";
-import CalendarScreen from "./component/CalendarScreen";
 import AddMedicine from "./component/PillTracker/AddMedicine";
 import EditMedicine from "./component/PillTracker/EditMedicine";
 import AddDoctor from "./component/Doctors/AddDoctor";
@@ -649,15 +648,6 @@ export default function App() {
         <Stack.Screen
           name="Edit Medication"
           component={EditMedicine}
-          options={() => ({
-            headerStyle: {
-              backgroundColor: "#800000",
-            },
-          })}
-        />
-        <Stack.Screen
-          name="Calendar"
-          component={CalendarScreen}
           options={() => ({
             headerStyle: {
               backgroundColor: "#800000",

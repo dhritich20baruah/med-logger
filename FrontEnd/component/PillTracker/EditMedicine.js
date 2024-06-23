@@ -5,12 +5,10 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  Platform,
   Alert,
   ScrollView,
   StyleSheet,
-  Pressable,
-  Button,
+
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import ScrollPicker from "react-native-wheel-scrollview-picker";
