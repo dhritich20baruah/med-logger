@@ -35,6 +35,7 @@ import CameraFunction from "./component/Diagnotics/CameraFunction";
 import DailyActivity from "./component/History/DailyActivity";
 import Settings from "./component/Settings";
 import EditProfile from "./component/Settings/EditProfile";
+import PrivacyPolicy from "./component/Settings/PrivacyPolicy";
 
 //DATABASE
 const db = SQLite.openDatabase("med-logger2.db");
@@ -101,7 +102,7 @@ function HomeScreen({ navigation, route }) {
       tx.executeSql(
         "CREATE TABLE IF NOT EXISTS userData (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, age INTEGER, weight REAL, height REAL, breakfast TEXT, lunch TEXT, dinner TEXT)"
       );
-    }); 
+    });
   }, []);
 
   useFocusEffect(
@@ -121,9 +122,9 @@ function HomeScreen({ navigation, route }) {
         (txObj, error) => console.log(error)
       );
     });
-  }
+  };
 
-  const image = require("./assets/Background.png");
+  const image = require("./assets/background.jpg");
 
   const handleSubmit = () => {
     if (!name.trim()) {
@@ -540,10 +541,10 @@ export default function App() {
       Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, []);
-  
-  useEffect(()=>{
+
+  useEffect(() => {
     schedulePushNotification(pillTimings);
-  }, [])
+  }, []);
 
   return (
     <NavigationContainer>
@@ -708,9 +709,18 @@ export default function App() {
             },
           })}
         />
-          <Stack.Screen
+        <Stack.Screen
           name="Edit Profile"
           component={EditProfile}
+          options={() => ({
+            headerStyle: {
+              backgroundColor: "#800000",
+            },
+          })}
+        />
+        <Stack.Screen
+          name="Privacy Policy"
+          component={PrivacyPolicy}
           options={() => ({
             headerStyle: {
               backgroundColor: "#800000",
@@ -800,14 +810,21 @@ const styles = StyleSheet.create({
   },
   itemText: {
     color: "#800000",
-    paddingVertical: 25,
+    paddingVertical: 10,
     paddingHorizontal: 10,
     borderRadius: 15,
     textAlign: "center",
     backgroundColor: "white",
-    fontSize: 25,
+    fontSize: 30,
     fontWeight: "500",
-    elevation: 15,
+    shadowColor: "black",
+    shadowOffset: {
+      width: 25,
+      height: 25,
+    },
+    shadowOpacity: 0.85,
+    shadowRadius: 25,
+    elevation: 55,
   },
   modalView: {
     margin: 20,
@@ -820,7 +837,7 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.55,
     shadowRadius: 4,
     elevation: 5,
   },
@@ -859,6 +876,14 @@ const styles = StyleSheet.create({
     backgroundColor: "orange",
     padding: 10,
     borderRadius: 5,
+    shadowColor: "black",
+    shadowOffset: {
+      width: 15,
+      height: 15,
+    },
+    shadowOpacity: 0.85,
+    shadowRadius: 8,
+    elevation: 50,
   },
   title: {
     margin: 5,

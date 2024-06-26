@@ -12,6 +12,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import * as SQLite from "expo-sqlite";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
+import FontAwesome from "@expo/vector-icons/FontAwesome6";
 
 //DATABASE
 const db = SQLite.openDatabase("med-logger2.db");
@@ -179,6 +180,7 @@ export default function Settings({ navigation, route }) {
           onPress={() => setModalVisible(true)}
         >
           <Text style={styles.btnText}>My Profile</Text>
+          <FontAwesome name="circle-arrow-right" size={20} color="#ffffff" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.touch}
@@ -187,12 +189,14 @@ export default function Settings({ navigation, route }) {
           }}
         >
           <Text style={styles.btnText}>Edit Profile</Text>
+          <FontAwesome name="circle-arrow-right" size={20} color="#ffffff" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.touch}
           onPress={() => setDeleteVisible(true)}
         >
           <Text style={styles.btnText}>Delete Profile</Text>
+          <FontAwesome name="circle-arrow-right" size={20} color="#ffffff" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.touch}
@@ -201,7 +205,18 @@ export default function Settings({ navigation, route }) {
           <Text style={styles.btnText}>
             Export Data
           </Text>
+          <FontAwesome name="circle-arrow-right" size={20} color="#ffffff" />
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.touch}
+          onPress={() => {navigation.navigate("Privacy Policy")}}
+        >
+          <Text style={styles.btnText}>
+            Privacy Policy
+          </Text>
+          <FontAwesome name="circle-arrow-right" size={20} color="#ffffff" />
+        </TouchableOpacity>
+        <Text style={{textAlign: "center", color: 'gray', fontWeight: '600', fontSize: 20, marginTop: 50}}>Version 1.1.0</Text>
       </View>
       <Modal
         animationType="slide"
@@ -356,6 +371,10 @@ const styles = StyleSheet.create({
     margin: 10,
     padding: 10,
     borderRadius: 15,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
   },
   btnText: {
     fontSize: 20,
