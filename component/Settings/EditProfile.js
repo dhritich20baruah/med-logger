@@ -382,7 +382,7 @@ export default function EditProfile({ navigation, route }) {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => setModalVisible(false)}
+            onPress={() => {navigation.goBack()}}
             style={{
               backgroundColor: "red",
               padding: 10,

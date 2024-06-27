@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "self-care",
-    "slug": "self-care",
+    "name": "med-logger",
+    "slug": "med-logger",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

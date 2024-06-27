@@ -54,9 +54,9 @@ export default function PrivacyPolicy({ navigation, route }) {
       </Text>
       <Text style={{fontSize: 20, fontWeight: 'bold', marginVertical: 5}}>Contact Us</Text>
       <Text style={{fontSize: 15, fontWeight: 'bold', marginVertical: 5}}>Inquiries:</Text>
-      <Text style={{fontSize: 15, marginVertical: 5, textAlign: 'justify'}}>
+      <Text style={{fontSize: 15, marginTop: 5, textAlign: 'justify', marginBottom: 25}}>
         If you have any questions or concerns about this privacy policy, please
-        contact us at dhriti.dev@gmail.com.
+        contact us at dhriti.baruah20@gmail.com.
       </Text>
     </View>
     </ScrollView>
