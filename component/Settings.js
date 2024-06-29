@@ -13,6 +13,7 @@ import * as SQLite from "expo-sqlite";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import FontAwesome from "@expo/vector-icons/FontAwesome6";
+import { Linking } from "react-native";
 
 //DATABASE
 const db = SQLite.openDatabase("med-logger2.db");
@@ -172,6 +173,20 @@ export default function Settings({ navigation, route }) {
     });
   };
 
+  
+  const openExternalURL = () => {
+    const url = `https://www.dhritibaruah.in/Medlogger`
+    Linking.canOpenURL(url)
+      .then((supported) => {
+        if (supported) {
+          Linking.openURL(url);
+        } else {
+          console.log("Don't know how to open URI: " + url);
+        }
+      })
+      .catch((err) => console.error('An error occurred', err));
+  };
+
   return (
     <View>
       <View style={styles.container}>
@@ -213,6 +228,15 @@ export default function Settings({ navigation, route }) {
         >
           <Text style={styles.btnText}>
             Privacy Policy
+          </Text>
+          <FontAwesome name="circle-arrow-right" size={20} color="#ffffff" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.touch}
+          onPress={openExternalURL}
+        >
+          <Text style={styles.btnText}>
+            User Manual
           </Text>
           <FontAwesome name="circle-arrow-right" size={20} color="#ffffff" />
         </TouchableOpacity>

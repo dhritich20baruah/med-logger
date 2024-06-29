@@ -167,7 +167,7 @@ const RecordCard = ({ prevReadings }) => {
 
   return (
     <View style={styles.card}>
-      <Text style={styles.cardTitle}>Last Record</Text>
+      <Text style={styles.cardTitle}>Previous Record</Text>
       <View style={styles.recordContainer}>
         <View style={styles.recordItem}>
           <Text style={styles.recordLabel}>Systolic</Text>
@@ -192,7 +192,7 @@ const RecordCard = ({ prevReadings }) => {
         </View>
       </View>
       <Button
-        title="VIEW ALL"
+        title="VIEW HISTORY"
         color="#FFA500"
         onPress={() => setModalVisible(true)}
       />

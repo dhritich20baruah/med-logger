@@ -214,7 +214,7 @@ function HomeScreen({ navigation, route }) {
             <View key={item.id} style={styles.itemContainer}>
               <TouchableOpacity
                 onPress={() =>
-                  navigation.navigate("Dashboard", { userID: item.id })
+                  navigation.navigate("Menu", { userID: item.id })
                 }
               >
                 <Text style={styles.itemText}>{item.name}</Text>
@@ -575,7 +575,7 @@ export default function App() {
           })}
         />
         <Stack.Screen
-          name="Dashboard"
+          name="Menu"
           component={Dashboard}
           options={() => ({
             headerStyle: {
@@ -798,6 +798,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    opacity: 0.9
   },
   content: {
     flex: 1,
@@ -873,10 +874,10 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 20,
     textAlign: "center",
-    backgroundColor: "orange",
+    backgroundColor: "darkgreen",
     padding: 10,
     borderRadius: 5,
-    shadowColor: "black",
+    shadowColor: "white",
     shadowOffset: {
       width: 15,
       height: 15,
