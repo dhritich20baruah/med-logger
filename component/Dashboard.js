@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Text,
   View,
@@ -8,8 +8,13 @@ import {
 } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome6";
 import * as SQLite from "expo-sqlite";
+// import { BannerAd, BannerAdSize, TestIds, useForeground } from 'react-native-google-mobile-ads';
+
+// const adUnitId = __DEV__ ? TestIds.ADAPTIVE_BANNER : 'ca-app-pub-xxxxxxxxxxxxx/yyyyyyyyyyyyyy';
+
 
 const Dashboard = ({ navigation, route }) => {
+  const bannerRef = useRef<BannerAd>(null);
   const [users, setUsers] = useState([
     { id: "", name: "", weight: "", height: "" },
   ]);
@@ -153,6 +158,7 @@ const Dashboard = ({ navigation, route }) => {
           />
         </TouchableOpacity>
       </View>
+      {/* <BannerAd ref={bannerRef} unitId={adUnitId} size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER} /> */}
     </SafeAreaView>
   );
 };

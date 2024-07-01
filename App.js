@@ -36,6 +36,7 @@ import DailyActivity from "./component/History/DailyActivity";
 import Settings from "./component/Settings";
 import EditProfile from "./component/Settings/EditProfile";
 import PrivacyPolicy from "./component/Settings/PrivacyPolicy";
+import 'expo-dev-client'
 
 //DATABASE
 const db = SQLite.openDatabase("med-logger2.db");
